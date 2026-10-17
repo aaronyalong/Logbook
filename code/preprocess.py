@@ -66,7 +66,7 @@ COLUMNS = {
 
 # Coded fields that hold several values separated by "; ".
 MULTI_VALUED = [
-    "work_environment", "flight_phase", "maintenance_items", "component_problem",
+    "work_environment", "mission", "flight_phase", "maintenance_items", "component_problem",
     "reporter_function", "reporter_qualification", "human_factors",
     "communication_breakdown", "anomaly", "detector", "when_detected", "result",
     "contributing_factors",
@@ -86,6 +86,10 @@ AIRCRAFT_FAMILIES = [
     ("Dash 8", r"^(Dash 8|Q400)"), ("ATR", r"^ATR"),
 ]
 
+# The taxonomy's "Other" option carries analyst free text ("Other During Maintenance",
+# "Other Tow", ...), which would otherwise turn into hundreds of one-off filter values.
+OTHER_FREE_TEXT = re.compile(r"^Other\b(?! / Unknown).*")
+
 
 def load_raw():
     df = pd.read_csv(RAW_CSV, header=[0, 1], dtype=str)
@@ -101,6 +105,14 @@ def aircraft_family(make_model):
             if re.search(pattern, make_model):
                 return family
     return None
+
+
+def split_values(cell):
+    """'Taxi; Other Tow' -> ['Taxi', 'Other'] (deduplicated, order kept)."""
+    if not isinstance(cell, str):
+        return []
+    values = [OTHER_FREE_TEXT.sub("Other", v.strip()) for v in cell.split(";")]
+    return list(dict.fromkeys(v for v in values if v))
 
 
 def load_abbreviations():
@@ -139,7 +151,7 @@ def build_tables(df):
     reports = reports.drop(columns="date")
     reports["aircraft_family"] = reports["make_model"].map(aircraft_family)
     for col in MULTI_VALUED:
-        reports[col] = reports[col].map(lambda v: v.split("; ") if isinstance(v, str) else [])
+        reports[col] = reports[col].map(split_values)
 
     expand = make_expander(load_abbreviations())
     rows = []
