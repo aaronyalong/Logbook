@@ -90,6 +90,9 @@ AIRCRAFT_FAMILIES = [
 # "Other Tow", ...), which would otherwise turn into hundreds of one-off filter values.
 OTHER_FREE_TEXT = re.compile(r"^Other\b(?! / Unknown).*")
 
+# Severity qualifiers exported as their own list item ("Conflict Ground Conflict; Critical").
+SEVERITY_QUALIFIERS = {"Critical", "Less Severe"}
+
 
 def load_raw():
     df = pd.read_csv(RAW_CSV, header=[0, 1], dtype=str)
@@ -108,11 +111,20 @@ def aircraft_family(make_model):
 
 
 def split_values(cell):
-    """'Taxi; Other Tow' -> ['Taxi', 'Other'] (deduplicated, order kept)."""
+    """'Taxi; Other Tow' -> ['Taxi', 'Other'] (deduplicated, order kept).
+
+    A standalone severity qualifier is reattached to the value before it:
+    'Conflict Ground Conflict; Critical' -> ['Conflict Ground Conflict Critical'].
+    """
     if not isinstance(cell, str):
         return []
-    values = [OTHER_FREE_TEXT.sub("Other", v.strip()) for v in cell.split(";")]
-    return list(dict.fromkeys(v for v in values if v))
+    values = []
+    for v in (OTHER_FREE_TEXT.sub("Other", v.strip()) for v in cell.split(";")):
+        if v in SEVERITY_QUALIFIERS and values:
+            values[-1] = f"{values[-1]} {v}"
+        elif v:
+            values.append(v)
+    return list(dict.fromkeys(values))
 
 
 def load_abbreviations():

@@ -53,6 +53,8 @@ Distinct values and coverage for each field the `build_filter` tool can constrai
 
 | Field | Distinct values | Reports with a value | Top values |
 |---|---|---|---|
+| `time_of_day` | 4 | 77% | 0601-1200 (733); 0001-0600 (608); 1201-1800 (570) |
+| `light` | 4 | 54% | Daylight (823); Night (726); Dusk (72) |
 | `aircraft_family` | 25 | 67% | B737 (506); A320 family (312); CRJ (216) |
 | `make_model` | 225 | 100% | Commercial Fixed Wing (403); A320 (166); B737-800 (157) |
 | `aircraft_operator` | 12 | 93% | Air Carrier (2600); Air Taxi (82); Personal (71) |
@@ -68,7 +70,7 @@ Distinct values and coverage for each field the `build_filter` tool can constrai
 | `reporter_function` | 22 | 100% | Technician (2370); Other / Unknown (280); Lead Technician (274) |
 | `reporter_organization` | 11 | 97% | Air Carrier (2604); Contracted Service (114); Air Taxi (66) |
 | `human_factors` | 12 | 89% | Communication Breakdown (1680); Situational Awareness (1646); Confusion (974) |
-| `anomaly` | 55 | 100% | Deviation / Discrepancy - Procedural Published Material / Policy (2646); Aircraft Equipment Problem Critical (1559); Deviation / Discrepancy - Procedural Maintenance (1266) |
+| `anomaly` | 54 | 100% | Deviation / Discrepancy - Procedural Published Material / Policy (2646); Aircraft Equipment Problem Critical (1559); Deviation / Discrepancy - Procedural Maintenance (1266) |
 | `detector` | 12 | 96% | Person Maintenance (2240); Person Flight Crew (634); Person Ground Personnel (102) |
 | `when_detected` | 7 | 89% | Routine Inspection (986); Aircraft In Service At Gate (720); In-flight (453) |
 | `result` | 29 | 95% | General Maintenance Action (2310); General Flight Cancelled / Delayed (615); Aircraft Aircraft Damaged (406) |

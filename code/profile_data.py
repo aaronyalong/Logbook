@@ -22,7 +22,7 @@ ASRS_ABBR = ROOT / "data/reference/asrs_abbreviations.json"
 
 # Fields the build_filter tool may constrain. List-typed columns are unnested before counting.
 FILTER_FIELDS = [
-    "aircraft_family", "make_model", "aircraft_operator", "far_part", "mission", "flight_phase",
+    "time_of_day", "light", "aircraft_family", "make_model", "aircraft_operator", "far_part", "mission", "flight_phase",
     "maintenance_type", "maintenance_items", "maintenance_deferred", "released_for_service",
     "component", "component_problem", "reporter_function", "reporter_organization",
     "human_factors", "anomaly", "detector", "when_detected", "result",

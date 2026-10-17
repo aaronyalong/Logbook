@@ -3,6 +3,18 @@
     "min": 2010,
     "max": 2026
   },
+  "time_of_day": {
+    "0601-1200": 733,
+    "0001-0600": 608,
+    "1201-1800": 570,
+    "1801-2400": 469
+  },
+  "light": {
+    "Daylight": 823,
+    "Night": 726,
+    "Dusk": 72,
+    "Dawn": 46
+  },
   "aircraft_family": {
     "B737": 506,
     "A320 family": 312,
@@ -804,9 +816,8 @@
     "Deviation / Discrepancy - Procedural Hazardous Material Violation": 100,
     "Ground Event / Encounter Other / Unknown": 96,
     "Flight Deck / Cabin / Aircraft Event Other / Unknown": 61,
-    "Conflict Ground Conflict": 59,
     "Ground Event / Encounter Object": 56,
-    "Critical": 47,
+    "Conflict Ground Conflict Critical": 47,
     "Flight Deck / Cabin / Aircraft Event Smoke / Fire / Fumes / Odor": 43,
     "Inflight Event / Encounter Other / Unknown": 37,
     "Ground Event / Encounter Vehicle": 36,
@@ -820,7 +831,7 @@
     "Ground Event / Encounter Fuel Issue": 18,
     "Inflight Event / Encounter Fuel Issue": 17,
     "No Specific Anomaly Occurred All Types": 15,
-    "Less Severe": 12,
+    "Conflict Ground Conflict Less Severe": 12,
     "Deviation / Discrepancy - Procedural Weight And Balance": 11,
     "Deviation / Discrepancy - Procedural Other / Unknown": 10,
     "Ground Event / Encounter Ground Strike - Aircraft": 8,
