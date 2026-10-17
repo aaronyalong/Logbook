@@ -1,0 +1,3 @@
+Search Criteria: 
+  Date of Incident was between January-2010, December-2026
+     and Reporter Function was Trainee, Technician, Parts / Stores Personnel, Quality Assurance / Audit, Other / Unknown, Lead Technician, Instructor, Inspector
