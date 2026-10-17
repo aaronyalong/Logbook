@@ -1,0 +1,1513 @@
+{
+  "source": "ASRS Abbreviations - Encode/Decode, May 2024 (Decode section)",
+  "abbreviations": {
+    "AC": [
+      "Air Conditioning",
+      "Alternating Current"
+    ],
+    "ACARS": [
+      "Automatic Communications Addressing & Reporting System"
+    ],
+    "ACFT": [
+      "Aircraft"
+    ],
+    "ACR": [
+      "Air Carrier"
+    ],
+    "ADC": [
+      "Air Data Computer"
+    ],
+    "ADF": [
+      "Automatic Direction Finder"
+    ],
+    "ADG": [
+      "Air Driven Generator"
+    ],
+    "ADI": [
+      "Attitude Direction Indicator"
+    ],
+    "ADIZ": [
+      "Air Defense Identification Zone"
+    ],
+    "AERO": [
+      "Aeronautical"
+    ],
+    "AFB": [
+      "Air Force Base"
+    ],
+    "AFD": [
+      "Airport/Facility Directory"
+    ],
+    "AFDS": [
+      "Autopilot and Flight Director System"
+    ],
+    "AFSS": [
+      "Automated Flight Service Station"
+    ],
+    "AGL": [
+      "Above Ground Level"
+    ],
+    "AIM": [
+      "Aeronautical Information Manual"
+    ],
+    "ALS": [
+      "Automatic Landing System"
+    ],
+    "ALSF-1": [
+      "Standard 2400' Hi-Intensity Approach Lighting System With Sequenced Flashers (Cat I Config)"
+    ],
+    "ALSF-2": [
+      "Standard 2400' Hi-Intensity Approach Lighting System With Sequenced Flashers (Cat II Config)"
+    ],
+    "ALT": [
+      "Altitude"
+    ],
+    "ALTDEV": [
+      "Altitude Deviation"
+    ],
+    "AM": [
+      "Ante Meridiem"
+    ],
+    "AMB": [
+      "Ambiguity"
+    ],
+    "AME": [
+      "Aviation Medical Examiner"
+    ],
+    "ANG": [
+      "Air National Guard"
+    ],
+    "APCH": [
+      "Approach"
+    ],
+    "APCH CTL": [
+      "Approach Control"
+    ],
+    "APPROX": [
+      "Approximately"
+    ],
+    "APU": [
+      "Auxiliary Power Unit"
+    ],
+    "ARPT": [
+      "Airport"
+    ],
+    "ARR": [
+      "Arrival, Arrive"
+    ],
+    "ARSR": [
+      "Air Route Surveillance Radar"
+    ],
+    "ARTCC": [
+      "Air Route Traffic Control Center"
+    ],
+    "ARTS": [
+      "Automated Radar Terminal Systems"
+    ],
+    "ASAP": [
+      "As Soon As Possible"
+    ],
+    "ASOS/AWOS": [
+      "Automated Surface Observation Sys (Or Weather Observation Sys)"
+    ],
+    "ASR": [
+      "Airport Surveillance Radar"
+    ],
+    "ASRS": [
+      "Aviation Safety Reporting System"
+    ],
+    "ATA": [
+      "Actual Time Of Arrival",
+      "Air Traffic Area"
+    ],
+    "ATC": [
+      "Air Traffic Control"
+    ],
+    "ATCT": [
+      "Airport Traffic Control Tower"
+    ],
+    "ATD": [
+      "Actual Time Of Departure"
+    ],
+    "ATIS": [
+      "Automatic Terminal Information Service"
+    ],
+    "ATOG": [
+      "Allowable Takeoff Gross Weight"
+    ],
+    "ATP": [
+      "Airline Transport Pilot Certificate"
+    ],
+    "ATR": [
+      "Airline Transport Rating"
+    ],
+    "ATTN": [
+      "Attention"
+    ],
+    "AUTH": [
+      "Authority/Authorized"
+    ],
+    "AUTO": [
+      "Automatic"
+    ],
+    "AUX": [
+      "Auxiliary"
+    ],
+    "AVG": [
+      "Average"
+    ],
+    "AVGAS": [
+      "Aviation Gasoline"
+    ],
+    "AWOS": [
+      "Automatic Weather Observing/Reporting System"
+    ],
+    "BAL": [
+      "Balance"
+    ],
+    "BASE OPS": [
+      "Base Operations Office"
+    ],
+    "BC": [
+      "Back Course"
+    ],
+    "BCSTN": [
+      "Broadcast Station"
+    ],
+    "BFR": [
+      "Biennial Flight Review"
+    ],
+    "BKN": [
+      "Broken"
+    ],
+    "BRITE": [
+      "Bright Radar Indicator Tower Equipment"
+    ],
+    "BTWN": [
+      "Between"
+    ],
+    "BVLOS": [
+      "Beyond Visual Line Of Sight"
+    ],
+    "C": [
+      "Celsius"
+    ],
+    "C L R": [
+      "Clear"
+    ],
+    "CA": [
+      "Captain"
+    ],
+    "CAB": [
+      "Cabin Attendant"
+    ],
+    "CADC": [
+      "Central Air Data Computer"
+    ],
+    "CAP": [
+      "Civil Air Patrol"
+    ],
+    "CAPT": [
+      "Captain"
+    ],
+    "CARB": [
+      "Carburetor"
+    ],
+    "CAT": [
+      "Category",
+      "Clear Air Turbulence"
+    ],
+    "CAWS": [
+      "Central Aural Warning System"
+    ],
+    "CB": [
+      "Circuit Breaker"
+    ],
+    "CBO": [
+      "Community Based Organization"
+    ],
+    "CD": [
+      "Clearance Delivery"
+    ],
+    "CDI": [
+      "Course Deviation Indicator"
+    ],
+    "CDT": [
+      "Central Daylight Time"
+    ],
+    "CDU": [
+      "Control Display Unit"
+    ],
+    "CFI": [
+      "Certified Flight Instructor"
+    ],
+    "CFIT": [
+      "Controlled Flight Into Terrain"
+    ],
+    "CFR": [
+      "Crash Fire Rescue Equipment"
+    ],
+    "CGP": [
+      "Company Ground Personnel"
+    ],
+    "CHK": [
+      "Check"
+    ],
+    "CIC": [
+      "Controller In Charge"
+    ],
+    "CLB": [
+      "Climb"
+    ],
+    "CLRNC": [
+      "Clearance"
+    ],
+    "COA": [
+      "Certificate Of Authorization"
+    ],
+    "COM": [
+      "Communication"
+    ],
+    "CONFIG": [
+      "Configuration"
+    ],
+    "COORD": [
+      "Coordination"
+    ],
+    "COW": [
+      "Certificate Of Waiver"
+    ],
+    "CPU": [
+      "Central Processing Unit"
+    ],
+    "CRM": [
+      "Cockpit Resource Management"
+    ],
+    "CRT": [
+      "Cathode Ray Tube"
+    ],
+    "CSD": [
+      "Constant Speed Drive"
+    ],
+    "CST": [
+      "Central Standard Time"
+    ],
+    "CTAF": [
+      "Common Traffic Advisory Frequency"
+    ],
+    "CTL": [
+      "Control"
+    ],
+    "CTLR": [
+      "Controller"
+    ],
+    "CTR": [
+      "Center"
+    ],
+    "DAA": [
+      "Detect and Avoid"
+    ],
+    "DB": [
+      "Decibel"
+    ],
+    "DCU": [
+      "Data Control Unit"
+    ],
+    "DEG": [
+      "Degree"
+    ],
+    "DEMO": [
+      "Demonstration"
+    ],
+    "DEP": [
+      "Departure"
+    ],
+    "DEPT": [
+      "Department"
+    ],
+    "DEST": [
+      "Destination"
+    ],
+    "DEV": [
+      "Deviation"
+    ],
+    "DF": [
+      "Direction Finder"
+    ],
+    "DFDR": [
+      "Digital Flight Data Recorder"
+    ],
+    "DFGS": [
+      "Digital Flight Guidance System"
+    ],
+    "DGPS": [
+      "Differential Global Positioning System"
+    ],
+    "DH": [
+      "Decision Height"
+    ],
+    "DISTR": [
+      "Distraction"
+    ],
+    "DME": [
+      "Distance Measuring Equipment"
+    ],
+    "DOD": [
+      "Department Of Defense"
+    ],
+    "DOE": [
+      "Department Of Energy"
+    ],
+    "DOT": [
+      "Department Of Transportation"
+    ],
+    "DSCNT": [
+      "Descent"
+    ],
+    "DSND": [
+      "Descend"
+    ],
+    "DVFR": [
+      "Defense Visual Flight Rules"
+    ],
+    "E": [
+      "East"
+    ],
+    "EAC": [
+      "Expected Approach Clearance"
+    ],
+    "EAT": [
+      "Expected Approach Time"
+    ],
+    "EBND": [
+      "Eastbound"
+    ],
+    "ECAM": [
+      "Electronic Centralized Aircraft Monitoring"
+    ],
+    "ECOA": [
+      "Emergency Certificate Of Authorization"
+    ],
+    "EDT": [
+      "Eastern Daylight Time"
+    ],
+    "EFIS": [
+      "Electronic Flight Instrument System"
+    ],
+    "EICAS": [
+      "Engine Indicating and Crew Alerting System"
+    ],
+    "ELT": [
+      "Emergency Locator Transmitter"
+    ],
+    "EMER": [
+      "Emergency"
+    ],
+    "EMI": [
+      "Electromagnetic Interference"
+    ],
+    "EMS": [
+      "Emergency Medical Service"
+    ],
+    "ENG": [
+      "Engine"
+    ],
+    "ENGR": [
+      "Engineer"
+    ],
+    "ENRTE": [
+      "En Route"
+    ],
+    "EQUIP": [
+      "Equipment"
+    ],
+    "EROPS": [
+      "Extended Range Operations"
+    ],
+    "ESC": [
+      "Electronic Speed Control"
+    ],
+    "EST": [
+      "Eastern Standard Time",
+      "Estimate, Estimation"
+    ],
+    "ETA": [
+      "Estimated Time Of Arrival"
+    ],
+    "ETD": [
+      "Estimated Time Of Departure"
+    ],
+    "ETOPS": [
+      "Extended Range Twin Operations"
+    ],
+    "EVAC": [
+      "Evacuate/Evacuation"
+    ],
+    "EVAL": [
+      "Evaluate, Evaluation"
+    ],
+    "EXAM": [
+      "Examination"
+    ],
+    "F": [
+      "Fahrenheit"
+    ],
+    "FA": [
+      "Flight Attendant"
+    ],
+    "FAA": [
+      "Federal Aviation Administration"
+    ],
+    "FAC": [
+      "Facility"
+    ],
+    "FAF": [
+      "Final Approach Fix"
+    ],
+    "FAM": [
+      "Federal Air Marshal"
+    ],
+    "FAR": [
+      "Federal Aviation Regulation"
+    ],
+    "FAX": [
+      "Facsimile"
+    ],
+    "FBO": [
+      "Fixed-Base Operator"
+    ],
+    "FCC": [
+      "Federal Communications Commission"
+    ],
+    "FCDU": [
+      "Flight Control Data Concentrator"
+    ],
+    "FCU": [
+      "Flight Control Unit"
+    ],
+    "FD": [
+      "Flight Director"
+    ],
+    "FE": [
+      "Flight Engineer"
+    ],
+    "FGC": [
+      "Flight Guidance Computer"
+    ],
+    "FGS": [
+      "Flight Guidance Unit"
+    ],
+    "FIDO": [
+      "Flight Inspection District Office"
+    ],
+    "FL": [
+      "Flight Level"
+    ],
+    "FLC": [
+      "Flight Crew"
+    ],
+    "FLIP": [
+      "Flight Information Publication"
+    ],
+    "FLT": [
+      "Flight"
+    ],
+    "FM": [
+      "Frequency Modulation"
+    ],
+    "FMA": [
+      "Flight Mode Annunciator"
+    ],
+    "FMC": [
+      "Flight Management Computer"
+    ],
+    "FMGC": [
+      "Flight Management Guidance Computer"
+    ],
+    "FMGS": [
+      "Flight Management Guidance System"
+    ],
+    "FMS": [
+      "Flight Management System"
+    ],
+    "FO": [
+      "First Officer"
+    ],
+    "FOD": [
+      "Foreign Object Debris"
+    ],
+    "FOV": [
+      "Field Of View"
+    ],
+    "FPM": [
+      "Feet Per Minute"
+    ],
+    "FPV": [
+      "First Person View"
+    ],
+    "FREQ": [
+      "Frequency"
+    ],
+    "FRIA": [
+      "FAA-Recognized Identification Area"
+    ],
+    "FSDO": [
+      "Flight Standards District Office"
+    ],
+    "FSS": [
+      "Flight Service Station",
+      "Flight Service Station Specialist"
+    ],
+    "FT": [
+      "Feet/Foot"
+    ],
+    "FYI": [
+      "For Your Information"
+    ],
+    "GA": [
+      "General Aviation"
+    ],
+    "GADO": [
+      "General Aviation District Office"
+    ],
+    "GAR": [
+      "Go Around"
+    ],
+    "GC": [
+      "Ground Control"
+    ],
+    "GCS": [
+      "Ground Control Station"
+    ],
+    "GHZ": [
+      "Gigahertz"
+    ],
+    "GMT": [
+      "Greenwich Mean Time (Zulu, UTC)"
+    ],
+    "GND": [
+      "Ground"
+    ],
+    "GND SPD": [
+      "Ground Speed"
+    ],
+    "GNS": [
+      "Global Navigation System"
+    ],
+    "GOV": [
+      "Government"
+    ],
+    "GPS": [
+      "Global Positioning System"
+    ],
+    "GPWS": [
+      "Ground Proximity Warning System"
+    ],
+    "GS": [
+      "Glideslope (One Word)"
+    ],
+    "HDG": [
+      "Heading"
+    ],
+    "HDOF": [
+      "Handoff"
+    ],
+    "HELI": [
+      "Helicopter"
+    ],
+    "HF": [
+      "High Frequency"
+    ],
+    "HGT": [
+      "Height"
+    ],
+    "HIALS": [
+      "High Intensity Approach Light System"
+    ],
+    "HIRL": [
+      "High Intensity Runway Lights"
+    ],
+    "HORIZ": [
+      "Horizontal"
+    ],
+    "HQ": [
+      "Headquarters"
+    ],
+    "HR": [
+      "Hour"
+    ],
+    "HSI": [
+      "Horizontal Situation Indicator"
+    ],
+    "HUD": [
+      "Head Up Display"
+    ],
+    "HVY": [
+      "Heavy"
+    ],
+    "HWY": [
+      "Highway"
+    ],
+    "HYD": [
+      "Hydraulic"
+    ],
+    "HZ": [
+      "Hertz"
+    ],
+    "IAF": [
+      "Initial Approach Fix"
+    ],
+    "IAP": [
+      "Instrument Approach Procedure"
+    ],
+    "IAS": [
+      "Indicated Air Speed"
+    ],
+    "IATA": [
+      "International Air Transport Association"
+    ],
+    "IAW": [
+      "In Accordance With"
+    ],
+    "ICAO": [
+      "International Civil Aviation Organization"
+    ],
+    "ID": [
+      "Identification"
+    ],
+    "IDENT": [
+      "Identify"
+    ],
+    "IF": [
+      "Intermediate Fix"
+    ],
+    "IFF": [
+      "Identification, Friend Or Foe"
+    ],
+    "IFR": [
+      "Instrument Flight Rules"
+    ],
+    "IFSS": [
+      "International Flight Service Station"
+    ],
+    "ILS": [
+      "Instrument Landing System"
+    ],
+    "IMC": [
+      "Instrument Meteorological Conditions"
+    ],
+    "IMU": [
+      "Inertial Measurement Unit"
+    ],
+    "INBND": [
+      "Inbound"
+    ],
+    "INC": [
+      "Incorporated"
+    ],
+    "INFO": [
+      "Information"
+    ],
+    "INOP": [
+      "Inoperative"
+    ],
+    "INS": [
+      "Inertial Navigation System"
+    ],
+    "INST": [
+      "Instrument"
+    ],
+    "INTERFAC": [
+      "Interfacility"
+    ],
+    "INTERP": [
+      "Interpretation"
+    ],
+    "INTL": [
+      "International"
+    ],
+    "INTXN": [
+      "Intersection"
+    ],
+    "IOE": [
+      "Initial Operating Experience"
+    ],
+    "IRO": [
+      "International Relief Officer"
+    ],
+    "IRS/IRU": [
+      "Inertial Reference System/Unit"
+    ],
+    "ISDU": [
+      "Inertial Navigation Display Unit"
+    ],
+    "ISTR": [
+      "Instruct, Instructor"
+    ],
+    "KG": [
+      "Kilogram"
+    ],
+    "KHZ": [
+      "Kilohertz"
+    ],
+    "KIAS": [
+      "Knots Indicated Airspeed"
+    ],
+    "KM": [
+      "Kilometers"
+    ],
+    "KT": [
+      "Knot(S)"
+    ],
+    "KW": [
+      "Kilowatt"
+    ],
+    "L/R": [
+      "Left/Right (Directions)"
+    ],
+    "LAANC": [
+      "Low-Altitude Authorization and Notification Capability"
+    ],
+    "LAT": [
+      "Latitude"
+    ],
+    "LB": [
+      "Pound"
+    ],
+    "LC": [
+      "Local Control"
+    ],
+    "LCD": [
+      "Liquid Crystal Display"
+    ],
+    "LCL": [
+      "Local"
+    ],
+    "LED": [
+      "Light Emitting Diode"
+    ],
+    "LF": [
+      "Low Frequency"
+    ],
+    "LIPO": [
+      "Lithium Polymer Battery"
+    ],
+    "LIRL": [
+      "Low Intensity Runway Edge Lights"
+    ],
+    "LLWAS": [
+      "Low Level Wind Shear Alert System"
+    ],
+    "LLWS": [
+      "Low Level Wind Shear"
+    ],
+    "LMM": [
+      "Compass Locator At ILS Middle Marker"
+    ],
+    "LNAV": [
+      "Lateral Navigation"
+    ],
+    "LNDG": [
+      "Landing"
+    ],
+    "LOA": [
+      "Letter Of Agreement"
+    ],
+    "LOC": [
+      "Localizer"
+    ],
+    "LOM": [
+      "Compass Locator At ILS Outer Marker"
+    ],
+    "LONG": [
+      "Longitude"
+    ],
+    "LORAN": [
+      "Long Range Navigation"
+    ],
+    "LOS": [
+      "Line Of Sight"
+    ],
+    "LTR": [
+      "Letter"
+    ],
+    "LTSS": [
+      "Less Than Standard Separation"
+    ],
+    "LWOC": [
+      "Landing Without Clrnc"
+    ],
+    "LZ": [
+      "Landing Zone"
+    ],
+    "M": [
+      "Mach Number"
+    ],
+    "MAG": [
+      "Magnetic"
+    ],
+    "MAINT": [
+      "Maintenance"
+    ],
+    "MALS": [
+      "Medium Intensity Approach Lighting System"
+    ],
+    "MALSF": [
+      "Medium Intensity Approach Lighting System With Sequenced Flashing Lights"
+    ],
+    "MALSR": [
+      "Medium Intensity Approach Lighting System With Runway Alignment Indicator Lights"
+    ],
+    "MAP": [
+      "Missed Approach Point"
+    ],
+    "MAX": [
+      "Maximum"
+    ],
+    "MB": [
+      "Millibars"
+    ],
+    "MCA": [
+      "Minimum Crossing Altitude"
+    ],
+    "MCAS": [
+      "Marine Corps Air Station"
+    ],
+    "MCP": [
+      "Mode Control Panel"
+    ],
+    "MDA": [
+      "Minimum Descent Altitude"
+    ],
+    "MDT": [
+      "Mountain Daylight Time"
+    ],
+    "MEA": [
+      "Minimum Enroute Altitude"
+    ],
+    "MECH": [
+      "Mechanic"
+    ],
+    "MEL": [
+      "Minimum Equipment List"
+    ],
+    "METRO": [
+      "Metropolitan"
+    ],
+    "MF": [
+      "Medium Frequency"
+    ],
+    "MFDU": [
+      "Multi Function Display Unit"
+    ],
+    "MGMNT": [
+      "Management"
+    ],
+    "MGR": [
+      "Manager"
+    ],
+    "MHZ": [
+      "Megahertz"
+    ],
+    "MI": [
+      "Mile"
+    ],
+    "MIC": [
+      "Microphone"
+    ],
+    "MIKE": [
+      "Microphone"
+    ],
+    "MIL": [
+      "Military"
+    ],
+    "MIN": [
+      "Minute(S)"
+    ],
+    "MIRL": [
+      "Medium Intensity Runway Edge Lights"
+    ],
+    "MISC": [
+      "Miscellaneous"
+    ],
+    "MLS": [
+      "Microwave Landing System"
+    ],
+    "MM": [
+      "Middle Marker"
+    ],
+    "MOA": [
+      "Military Operating Area"
+    ],
+    "MOCA": [
+      "Minimum Obstruction Clearance Altitude"
+    ],
+    "MSA": [
+      "Minimum Safe Altitude"
+    ],
+    "MSAW": [
+      "Minimum Safe Altitude Warning"
+    ],
+    "MSG": [
+      "Message"
+    ],
+    "MSL": [
+      "Mean Sea Level"
+    ],
+    "MST": [
+      "Mountain Standard Time"
+    ],
+    "MTR": [
+      "Military Training Route"
+    ],
+    "MUNI": [
+      "Municipal"
+    ],
+    "MVA": [
+      "Minimum Vector Altitude"
+    ],
+    "MVFR": [
+      "Marginal Visual Flight Rules"
+    ],
+    "N": [
+      "North"
+    ],
+    "NAS": [
+      "Naval Air Station"
+    ],
+    "NASA": [
+      "National Aeronautics and Space Administration"
+    ],
+    "NATL": [
+      "National"
+    ],
+    "NAV": [
+      "Navigate, Navigation"
+    ],
+    "NAVAID": [
+      "Navigational Aid"
+    ],
+    "NBND": [
+      "Northbound"
+    ],
+    "NDB": [
+      "Nondirectional Radio Beacon"
+    ],
+    "NDB/DME": [
+      "NDB and DME (Co-located)"
+    ],
+    "NFCT": [
+      "Non Federal Control Tower"
+    ],
+    "NFZ": [
+      "No-Fly Zone"
+    ],
+    "NM": [
+      "Nautical Mile"
+    ],
+    "NMAC": [
+      "Near Midair Collision"
+    ],
+    "NOAA": [
+      "National Oceanic and Atmospheric Administration"
+    ],
+    "NORAC": [
+      "No Radio Contact"
+    ],
+    "NORDO": [
+      "No Radio"
+    ],
+    "NOTAM": [
+      "Notice to Airmen / of Air Missions"
+    ],
+    "NTSB": [
+      "National Transportation Safety Board"
+    ],
+    "NWS": [
+      "National Weather Service"
+    ],
+    "OAT": [
+      "Outside Air Temperature"
+    ],
+    "OJT": [
+      "On-The-Job Training"
+    ],
+    "OM": [
+      "Outer Marker"
+    ],
+    "ONS": [
+      "Omega Navigation System"
+    ],
+    "OP": [
+      "Operation(S)"
+    ],
+    "OPDEV": [
+      "Operational Deviation"
+    ],
+    "OPERROR": [
+      "Operational Error"
+    ],
+    "OSD": [
+      "On-Screen Display"
+    ],
+    "OTS": [
+      "Out Of Service"
+    ],
+    "OVCST": [
+      "Overcast"
+    ],
+    "PA": [
+      "Public Address"
+    ],
+    "PAPI": [
+      "Precision Approach Path Indicator"
+    ],
+    "PAR": [
+      "Precision Approach Radar"
+    ],
+    "PAX": [
+      "Passenger"
+    ],
+    "PCA": [
+      "Positive Control Area"
+    ],
+    "PCL": [
+      "Pilot Controlled Lighting"
+    ],
+    "PCU": [
+      "Power Control Unit"
+    ],
+    "PDC": [
+      "Pre Departure Clearance"
+    ],
+    "PDT": [
+      "Pacific Daylight Time"
+    ],
+    "PF": [
+      "Pilot Flying"
+    ],
+    "PIC": [
+      "Pilot In Command"
+    ],
+    "PIREP": [
+      "Pilot Report"
+    ],
+    "PLT": [
+      "Pilot"
+    ],
+    "PLTDEV": [
+      "Pilot Deviation"
+    ],
+    "PM": [
+      "Post Meridiem"
+    ],
+    "PMC": [
+      "Pilot Manipulating Controls"
+    ],
+    "PNF": [
+      "Pilot Not Flying"
+    ],
+    "POI": [
+      "Point Of Interest"
+    ],
+    "POS": [
+      "Position"
+    ],
+    "PRECIP": [
+      "Precipitation"
+    ],
+    "PROB": [
+      "Problem"
+    ],
+    "PROC": [
+      "Procedure"
+    ],
+    "PROP": [
+      "Propeller"
+    ],
+    "PROX": [
+      "Proximity"
+    ],
+    "PST": [
+      "Pacific Standard Time"
+    ],
+    "PUB": [
+      "Publication"
+    ],
+    "PVT": [
+      "Private"
+    ],
+    "PWR": [
+      "Power"
+    ],
+    "QFE": [
+      "Height Above Airport Elevation"
+    ],
+    "QRH": [
+      "Quick Reference Handbook"
+    ],
+    "RA": [
+      "Resolution Advisory"
+    ],
+    "RAIL": [
+      "Runway Alignment Indicator Lights"
+    ],
+    "RAPCON": [
+      "Radar Approach Control"
+    ],
+    "RAT": [
+      "Ram Air Turbine/Ram Air Temperature"
+    ],
+    "RC": [
+      "Radio Controlled"
+    ],
+    "RDMI": [
+      "Radio Direction Magnetic Indicator"
+    ],
+    "REF": [
+      "Reference"
+    ],
+    "REG": [
+      "Regulation"
+    ],
+    "REIL": [
+      "Runway End Identifier Lights"
+    ],
+    "RESTR": [
+      "Restrict, Restricted, Restriction"
+    ],
+    "RF": [
+      "Radio Frequency"
+    ],
+    "RFI": [
+      "Radio Frequency Interference"
+    ],
+    "RID": [
+      "Remote ID (Identification)"
+    ],
+    "RMI": [
+      "Radio Magnetic Indicator"
+    ],
+    "RNAV": [
+      "Area Navigation"
+    ],
+    "RPA": [
+      "Remotely Piloted Aircraft"
+    ],
+    "RPAS": [
+      "Remotely Piloted Aircraft System"
+    ],
+    "RPIC": [
+      "Remote Pilot in Command"
+    ],
+    "RPM": [
+      "Revolutions Per Minute"
+    ],
+    "RPV": [
+      "Remotely Piloted Vehicle"
+    ],
+    "RTB": [
+      "Return to Base"
+    ],
+    "RTE": [
+      "Route"
+    ],
+    "RTF": [
+      "Ready to Fly"
+    ],
+    "RTH": [
+      "Return to Home"
+    ],
+    "RTL": [
+      "Return to Launch"
+    ],
+    "RTO": [
+      "Rejected Takeoff"
+    ],
+    "RVR": [
+      "Runway Visual Range"
+    ],
+    "RVV": [
+      "Runway Visibility Value"
+    ],
+    "RWY": [
+      "Runway(s)"
+    ],
+    "S": [
+      "South"
+    ],
+    "SAA": [
+      "Sense and Avoid"
+    ],
+    "SBND": [
+      "Southbound"
+    ],
+    "SELCAL": [
+      "Selective Calling"
+    ],
+    "SFL": [
+      "Sequenced Flashing Lights"
+    ],
+    "SGI": [
+      "Special Government Interest"
+    ],
+    "SID": [
+      "Standard Instrument Departure"
+    ],
+    "SIGMET": [
+      "Significant Meteorological Information"
+    ],
+    "SIT": [
+      "Situation"
+    ],
+    "SL": [
+      "Sea Level"
+    ],
+    "SM": [
+      "Statute Mile"
+    ],
+    "SO": [
+      "Second Officer"
+    ],
+    "SOP": [
+      "Standard Operating Procedure"
+    ],
+    "SOSC": [
+      "System Operations Support Center"
+    ],
+    "SPD": [
+      "Speed"
+    ],
+    "SPEC": [
+      "Specification"
+    ],
+    "STAB": [
+      "Stabilizer"
+    ],
+    "STAR": [
+      "Standard Terminal Arrival Route"
+    ],
+    "STD": [
+      "Standard"
+    ],
+    "STOL": [
+      "Short Takeoff and Landing"
+    ],
+    "SUPVR": [
+      "Supervisor"
+    ],
+    "SVC": [
+      "Service"
+    ],
+    "SVFR": [
+      "Special Visual Flight Rules"
+    ],
+    "SYS": [
+      "System"
+    ],
+    "TA": [
+      "Traffic Advisory"
+    ],
+    "TACAN": [
+      "Tactical Air Navigation Aid"
+    ],
+    "TAS": [
+      "True Air Speed"
+    ],
+    "TCA": [
+      "Terminal Control Area"
+    ],
+    "TCAS": [
+      "Traffic Alert and Collision Avoidance System"
+    ],
+    "TDZ": [
+      "Touchdown Zone"
+    ],
+    "TELCO": [
+      "Telephone Company"
+    ],
+    "TEMP": [
+      "Temperature"
+    ],
+    "TFC": [
+      "Traffic"
+    ],
+    "TKOF": [
+      "Takeoff"
+    ],
+    "TOC": [
+      "Top Of Climb"
+    ],
+    "TOD": [
+      "Top Of Descent"
+    ],
+    "TOGW": [
+      "Takeoff Gross Weight"
+    ],
+    "TR": [
+      "VFR Low Altitude Training Routes"
+    ],
+    "TRACON": [
+      "Terminal Radar Approach Control Facility"
+    ],
+    "TRNG": [
+      "Training"
+    ],
+    "TRSA": [
+      "Terminal Radar Service Area"
+    ],
+    "TRUST": [
+      "The Recreational UAS Safety Test"
+    ],
+    "TSTM": [
+      "Thunderstorm"
+    ],
+    "TURB": [
+      "Turbulence"
+    ],
+    "TWR": [
+      "Tower"
+    ],
+    "TX": [
+      "Transmitter"
+    ],
+    "TXWY": [
+      "Taxiway"
+    ],
+    "UA": [
+      "Unmanned Aircraft"
+    ],
+    "UAP": [
+      "Unidentified Anomalous Phenomena"
+    ],
+    "UAS": [
+      "Unmanned Aircraft System"
+    ],
+    "UASFM": [
+      "Unmanned Aircraft Systems Facility Map"
+    ],
+    "UAV": [
+      "Unmanned Aerial Vehicle"
+    ],
+    "UFO": [
+      "Unidentified Flying Object"
+    ],
+    "UHF": [
+      "Ultra High Frequency"
+    ],
+    "UNAUTH": [
+      "Unauthorized"
+    ],
+    "USA": [
+      "United States Army"
+    ],
+    "USAF": [
+      "United States Air Force"
+    ],
+    "USCG": [
+      "United States Coast Guard"
+    ],
+    "USMC": [
+      "United States Marine Corps"
+    ],
+    "USN": [
+      "United States Navy"
+    ],
+    "UTC": [
+      "Universal Time Coordinated (GMT, Zulu)"
+    ],
+    "UTM": [
+      "Unmanned Aircraft Systems Traffic Management"
+    ],
+    "VASI": [
+      "Visual Approach Slope Indicator"
+    ],
+    "VERT": [
+      "Vertical"
+    ],
+    "VFR": [
+      "Visual Flight Rules"
+    ],
+    "VHF": [
+      "Very High Frequency"
+    ],
+    "VIS": [
+      "Visibility"
+    ],
+    "VLF": [
+      "Very Low Frequency"
+    ],
+    "VLOS": [
+      "Visual Line of Sight"
+    ],
+    "VMC": [
+      "Visual Meteorological Conditions"
+    ],
+    "VNAV": [
+      "Vertical Navigation"
+    ],
+    "VO": [
+      "Visual Observer"
+    ],
+    "VOR": [
+      "VFR Omni-Directional Radio Range"
+    ],
+    "VOR/DME": [
+      "VOR and DME (Co-located)"
+    ],
+    "VORTAC": [
+      "VOR and TACAN (Co-Located)"
+    ],
+    "VR": [
+      "VFR Military Training Routes"
+    ],
+    "VSTOL": [
+      "Vertical/Short Takeoff and Landing"
+    ],
+    "W": [
+      "West"
+    ],
+    "WAC": [
+      "World Aeronautical Chart"
+    ],
+    "WBND": [
+      "Westbound"
+    ],
+    "WK": [
+      "Week"
+    ],
+    "WT": [
+      "Weight"
+    ],
+    "WX": [
+      "Weather"
+    ],
+    "XCOUNTRY": [
+      "Cross Country"
+    ],
+    "XING": [
+      "Crossing"
+    ],
+    "XMISSION": [
+      "Transmission"
+    ],
+    "XMIT": [
+      "Transmit"
+    ],
+    "XPONDER": [
+      "Transponder"
+    ],
+    "XWIND": [
+      "Crosswind"
+    ],
+    "Z": [
+      "Zulu Time (UTC/GMT)"
+    ],
+    "mAh": [
+      "Milliampere Hour"
+    ],
+    "sUAS": [
+      "Small Unmanned Aircraft System"
+    ]
+  }
+}
