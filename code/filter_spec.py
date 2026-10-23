@@ -36,27 +36,37 @@ def validate(spec):
     if not (isinstance(acns, list) and all(isinstance(a, int) for a in acns)):
         errors.append("'acn' must be a list of integers")
 
+    years = {}
     for key in ("year_min", "year_max"):
         year = spec.get(key)
-        if year is not None and not (isinstance(year, int) and YEAR_RANGE["min"] <= year <= YEAR_RANGE["max"]):
+        if isinstance(year, int) and YEAR_RANGE["min"] <= year <= YEAR_RANGE["max"]:
+            years[key] = year
+        elif year is not None:
             errors.append(f"'{key}' must be an integer in {YEAR_RANGE['min']}-{YEAR_RANGE['max']}, got {year!r}")
-    if spec.get("year_min") and spec.get("year_max") and spec["year_min"] > spec["year_max"]:
+    if len(years) == 2 and years["year_min"] > years["year_max"]:
         errors.append("'year_min' is after 'year_max'")
 
-    for field, values in spec.get("where", {}).items():
+    # Specs come from an LLM tool call, so malformed shapes must produce errors, not exceptions.
+    where = spec.get("where", {})
+    if not isinstance(where, dict):
+        errors.append("'where' must be an object mapping field names to lists of values")
+        where = {}
+    for field, values in where.items():
         if field not in FIELDS:
             errors.append(f"unknown field '{field}'")
         elif not (isinstance(values, list) and values):
             errors.append(f"'where.{field}' must be a non-empty list")
         else:
-            errors += [f"'{v}' is not a value of '{field}'" for v in values if v not in FIELDS[field]]
+            errors += [f"'{v}' is not a value of '{field}'" for v in values
+                       if not (isinstance(v, str) and v in FIELDS[field])]
 
     terms = spec.get("text_any", [])
     if not (isinstance(terms, list) and all(isinstance(t, str) and t.strip() for t in terms)):
         errors.append("'text_any' must be a list of non-empty strings")
 
-    if spec.get("group_by") is not None and spec["group_by"] not in FIELDS:
-        errors.append(f"cannot group by unknown field '{spec['group_by']}'")
+    group_by = spec.get("group_by")
+    if group_by is not None and not (isinstance(group_by, str) and group_by in FIELDS):
+        errors.append(f"cannot group by unknown field '{group_by}'")
     return errors
 
 
