@@ -87,6 +87,11 @@ def test_run_rejects_invalid_spec(con):
     ({"acn": ["1884087"]}, "'acn' must be a list of integers"),
     ({"text_any": [""]}, "'text_any' must be a list of non-empty strings"),
     ({"group_by": "airline"}, "cannot group by unknown field 'airline'"),
+    # malformed shapes an LLM might produce: reported, not raised
+    ({"where": ["B737"]}, "'where' must be an object"),
+    ({"where": {"aircraft_family": [["B737"]]}}, "is not a value of 'aircraft_family'"),
+    ({"group_by": ["anomaly"]}, "cannot group by unknown field"),
+    ({"year_min": "2022", "year_max": 2024}, "'year_min' must be an integer"),
 ])
 def test_validate_rejects(spec, message):
     assert any(message in e for e in validate(spec))
