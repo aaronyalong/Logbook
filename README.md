@@ -11,7 +11,8 @@ See the full [project proposal](proposal/CMPE259-Project-Proposal.pdf).
 | Data assembly: export, reference parsing, preprocessing, profiling | Complete |
 | Filter tool: spec, validation, execution against DuckDB, Claude tool call | Complete (generated filters not yet scored against gold) |
 | Evaluation query set with gold filters | Complete |
-| Hybrid retrieval, citation-enforced synthesis, Streamlit interface | Planned |
+| Hybrid retrieval: BM25 + local embeddings, filtered, rank fusion | Complete |
+| Citation-enforced synthesis, Streamlit interface | Planned |
 | Model comparison, safety testing, peer testing | Planned |
 
 ## Pipeline
@@ -20,7 +21,7 @@ See the full [project proposal](proposal/CMPE259-Project-Proposal.pdf).
 User question
   → LLM tool call: build_filter(question) → JSON filter spec      code/build_filter.py
   → Spec validated against observed field values, run in DuckDB  code/filter_spec.py
-  → Hybrid retrieval (BM25 + dense) over the filtered narratives  planned
+  → Hybrid retrieval (BM25 + dense) over the filtered narratives  code/retrieve.py
   → LLM synthesis with mandatory ACN citation per claim           planned
   → Answer + cited source list
 ```
@@ -31,10 +32,11 @@ User question
 |------|----------|
 | [proposal/](proposal) | Project proposal |
 | [checkins/](checkins) | Progress check-in submissions |
-| [code/](code) | Pipeline source: abbreviation parsing, preprocessing, profiling, filter spec, filter tool call |
+| [code/](code) | Pipeline source: abbreviation parsing, preprocessing, profiling, filter spec, filter tool call, retrieval |
 | [data/raw/](data/raw) | ASRS export (CSV) and the search criteria used to produce it |
 | [data/reference/](data/reference) | ASRS Coding Taxonomy and Abbreviations (PDF), parsed abbreviation tables (JSON) |
 | [data/profile/](data/profile) | Generated corpus statistics and the observed value inventory for each filterable field |
+| [data/index/](data/index) | Prebuilt narrative embeddings for dense retrieval |
 | [prompts/](prompts) | System prompts and prompt variants |
 | [evaluation/](evaluation) | Query set, gold filters, and evaluation scripts |
 | [tests/](tests) | Unit tests |
@@ -81,6 +83,13 @@ python evaluation/check_gold_filters.py   # validate and run every gold filter
 
 `data/asrs.duckdb` is not committed; it rebuilds in a few seconds.
 
+The embedding index ([data/index/narrative_embeddings.npz](data/index)) is committed, because building it takes about 7 minutes on a laptop CPU. Rebuild it only when the narratives change; retrieval refuses to load an index that no longer matches the database.
+
+```bash
+python code/build_index.py            # → data/index/narrative_embeddings.npz
+python code/build_index.py --check    # does the committed index match data/asrs.duckdb?
+```
+
 Running a filter spec directly:
 
 ```python
@@ -101,6 +110,14 @@ It prints each tool call the model made, any validation errors, and the match co
 
 Every run appends a record to `logs/build_filter.jsonl` (not committed): each tool call, its validation errors, and its match counts.
 
+Searching the narratives (no API key needed). The first search downloads the embedding model (65 MB) into `.cache/`, which is not committed; after that, retrieval runs offline.
+
+```bash
+python code/retrieve.py "errors during landing gear inspections"           # hybrid, whole corpus
+python code/retrieve.py "how fatigue affected their work" --acn 1161791 1072746   # restricted to given reports
+python code/retrieve.py "shift turnover" --mode dense -k 5                 # dense only (naive-RAG baseline)
+```
+
 ## Testing
 
 ```bash
@@ -108,18 +125,19 @@ pip install -r code/requirements-dev.txt
 pytest
 ```
 
-The unit tests cover abbreviation parsing and expansion, value normalization, aircraft family mapping, filter validation and execution, the build_filter tool loop (against a scripted fake client, so no API key is needed), and consistency of the evaluation query set. A GitHub Actions workflow ([project-tests.yml](../.github/workflows/project-tests.yml)) runs them on every push that touches `project/`. It also rebuilds the pipeline from the raw export and fails if any committed generated file is out of date.
+The unit tests cover abbreviation parsing and expansion, value normalization, aircraft family mapping, filter validation and execution, the build_filter tool loop (against a scripted fake client, so no API key is needed), retrieval ranking and fusion (with a toy embedder, so no model download is needed), and consistency of the evaluation query set. A GitHub Actions workflow ([project-tests.yml](../.github/workflows/project-tests.yml)) runs them on every push that touches `project/`. It also rebuilds the pipeline from the raw export and fails if any committed generated file, including the embedding index, is out of date.
 
 ## Design Notes
 
 Decisions made after examining the exported data, relative to the proposal:
 
 - **Abbreviation normalization.** Narratives from 2010 onward are mixed-case prose; abbreviations make up about 2% of words. The ASRS list is oriented to flight operations and covers 24% of abbreviation tokens in this corpus. A hand-curated maintenance supplement ([maintenance_abbreviations.json](data/reference/maintenance_abbreviations.json)) raises coverage to 60%, and overrides ASRS senses that are wrong in a maintenance context (e.g. MM is Maintenance Manual, not Middle Marker). Expansion is applied only to the text used for indexing; original narratives are kept for display and citation.
-- **Chunking.** Narratives are short enough that each reporter's account is a single retrieval unit.
+- **Chunking.** Narratives are short enough that each reporter's account is a single retrieval unit. 14% of them exceed the embedding model's 512-token input, so their dense vector reflects only the opening; BM25 still scores the full text.
+- **Hybrid retrieval.** BM25 and dense similarity each rank the narratives the filter selected, and the two rankings are merged with reciprocal rank fusion (k = 60), which needs no score calibration between the rankers. A narrative that shares no terms with the question gets no BM25 credit. Both rankers see the abbreviation-expanded text, and the question is expanded the same way. Embeddings come from `BAAI/bge-small-en-v1.5`, run locally on ONNX through `fastembed`, so retrieval needs no network access or GPU, and the offline model path in the comparison stays fully offline. With 3,632 narratives, a brute-force NumPy dot product takes milliseconds, so the planned Chroma/FAISS vector store is unnecessary.
 - **Filter spec.** Beyond metadata constraints, the spec supports keyword matching (`text_any`) and aggregation (`group_by`), which several evaluation queries require. Values are validated against those observed in the corpus, so an invented category is rejected rather than silently returning no results.
 - **Filter tool call.** The system prompt ([build_filter_system.md](prompts/build_filter_system.md)) gives the model a field reference with coverage and every observed value. The tool takes a list of specs: one for most questions, one per side for a comparison (query 10). Validation runs before execution. A rejected call goes back to the model with the problems listed, and the model can correct it, up to three calls. The model sees only match counts, so it can notice a filter that matches nothing. The prompt favors broad filters, because an over-narrow filter loses reports that retrieval cannot recover.
 - **Aircraft family.** `make_model` has 225 distinct values; a derived `aircraft_family` column groups variants (e.g. B737-800, B737 MAX 9) so a question about "737s" matches all of them.
 
-## Planned Stack
+## Stack
 
-Python · DuckDB (metadata filter) · `rank_bm25` and a local sentence-embedding model with NumPy similarity search (hybrid retrieval) · Streamlit · Anthropic API and Ollama (model comparison)
+Python · DuckDB (metadata filter) · `rank_bm25` and `BAAI/bge-small-en-v1.5` via `fastembed`, with NumPy similarity search (hybrid retrieval) · Anthropic API (filter tool call) · planned: Streamlit, Ollama (model comparison)
