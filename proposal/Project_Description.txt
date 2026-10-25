@@ -1,0 +1,209 @@
+Project Overview
+Each student will design, build, and evaluate an LLM-based virtual assistant for a specific use case. The VA should help a realistic target user answer questions or complete tasks by combining an LLM with external information such as structured data, documents, APIs, retrieval systems, or web-based sources. The project is individual. Each student is responsible for their own use case, implementation, evaluation, artifacts, presentation, and demo recording.
+Students will also be assigned to peer support groups after the proposal stage. Groups will be formed based on similar project scopes, use cases, datasets, tools, or implementation approaches. Peer support groups are intended to provide feedback, troubleshooting support, and user testing. Group members may discuss ideas and provide feedback, but they may not create project materials for one another.
+Project Goals
+The project should demonstrate that students can:
+Define a realistic LLM-based virtual assistant use case.
+Design an assistant that uses external data or tools.
+Implement a working prototype.
+Compare models or system configurations.
+Evaluate the assistant using realistic user queries.
+Test the system for safety, security, robustness, and limitations.
+Communicate technical design decisions clearly.
+Reflect on what works, what fails, and what could be improved.
+Project Requirements and Specifications
+Required Project Components
+Component	Requirement
+In-class project presentation	Present the use case, system design, evaluation results, limitations, and key takeaways.
+Project artifacts	Submit the code or notebook, data or document sources, prompts or test queries, evaluation materials, setup instructions, and a short README/report.
+Demo recording	Show the assistant working and explain the major design choices.
+The written report is not a separate grading category. However, a short README/report is required as part of the project artifacts so that the instructor or ISA can inspect and evaluate the project.
+
+Project Status Labels
+Status	Meaning
+Advanced	Meets all Complete requirements and demonstrates strong overall quality.
+Complete	All required components are submitted or completed, and the core specifications are met.
+Incomplete	One or more required components is missing or cannot be evaluated.
+Complete Project Specifications
+A project is Complete when it satisfies all of the following specifications.
+
+1. Specific Use Case
+The assistant must be designed for a clearly defined use case and target user.
+
+The use case should be specific enough that the assistant can be meaningfully evaluated. For example, “a travel assistant” is too broad. “An assistant that helps students compare study-abroad programs based on budget, dates, and course requirements” is more appropriate.
+
+2. Working LLM-Based Assistant
+The project must include a working virtual assistant that uses a large language model (LLM) to respond to realistic user queries.
+
+The assistant does not need to be a polished product, but it must be functional enough to demonstrate the core workflow.
+
+3. External Data or Tool Use
+The assistant must use at least one meaningful external data source or tool.
+
+Examples include:
+
+A structured dataset or database
+A collection of documents
+A retrieval-augmented generation system
+An API
+A web-based source
+A search or scraping component
+A tool-calling workflow
+The external data source or tool must be central to the use case rather than added superficially.
+
+4. Model or Configuration Comparison
+The project must compare at least two LLMs or two meaningfully different system configurations.
+
+Examples include:
+
+A smaller model compared with a larger model
+Different prompting strategies
+Retrieval compared with no retrieval
+Different chunking or retrieval settings
+Different tool-use workflows
+Different temperature or decoding settings
+Different grounding or citation strategies
+The comparison should explain the tradeoffs between the models or configurations, not simply report which one “seemed better.”
+
+5. Test Query Set
+The project must include at least 20 realistic user queries relevant to the use case.
+
+The query set should include a mixture of:
+
+Common user questions
+Questions requiring data or tool use
+Ambiguous or underspecified questions
+Edge cases
+Questions the assistant may not be able to answer reliably
+6. Evaluation Evidence
+The project must include evaluation evidence showing how the assistant performed on the test query set.
+
+The evaluation should include:
+
+The query asked
+The expected behavior or expected answer
+The assistant’s response
+Whether the response was successful
+Notes on errors, limitations, or failure modes
+The evaluation does not need to be perfect, but it must be systematic enough to support a meaningful conclusion.
+
+7. Safety, Security, or Robustness Testing
+The project must include at least 5 safety, security, or robustness tests.
+
+These may include tests for:
+
+Direct prompt injection
+Indirect prompt injection through retrieved or external content
+Hallucinations or unsupported claims
+Requests outside the assistant’s scope
+Tool misuse
+Data leakage
+Unsafe or inappropriate user requests
+Ambiguous queries
+Conflicting information
+Missing information
+The project should explain what happened during these tests and what the results suggest about the system’s limitations.
+
+8. Peer/User Testing
+Each student must have at least two classmates test the assistant.
+
+The final artifacts must include a brief summary of:
+
+Who tested the assistant
+What types of queries they tried
+What worked well
+What failed or confused users
+What was changed, or what would be changed, based on the feedback
+9. In-Class Presentation
+The student must present the project in class.
+
+The presentation should explain:
+
+The use case and target users
+The system design
+The data sources and tools used
+The models or configurations compared
+The evaluation results
+The safety and robustness findings
+The system’s limitations and possible future improvements
+10. Project Artifacts
+The submitted artifacts must be sufficient for the instructor or ISA to inspect and evaluate the project.
+
+Artifacts should include:
+
+Code or notebook
+Data, documents, or database files, when shareable
+Links to external data sources or APIs, when applicable
+Prompt templates or system instructions
+Test query set
+Evaluation results
+Safety, security, or robustness test results
+Setup or run instructions
+A short README/report
+Slides, if required
+A link to the demo recording
+11. Demo Recording
+The demo recording must show the assistant working.
+
+The recording should include:
+
+A brief overview of the use case
+A walkthrough of the system
+At least a few representative queries
+An explanation of the major design choices
+A discussion of at least one limitation or failure case
+Advanced Project Specifications
+A project is Advanced when it meets all Complete requirements and demonstrates strong quality in several of the following areas.
+
+Area	Evidence of Advanced Work
+System design	Design choices are well justified and appropriate for the use case.
+Tool/data integration	External data or tool use is central, meaningful, and reliable.
+Model/configuration comparison	The comparison clearly explains tradeoffs between models or configurations.
+Evaluation	The evaluation is thoughtful, organized, and based on meaningful success criteria.
+Grounding	Responses are supported by retrieved or tool-based evidence when appropriate.
+Robustness/security	Testing includes realistic failure cases and meaningful discussion of risk.
+Usability	The assistant provides a coherent and understandable user experience.
+Technical quality	The code and artifacts are organized, reproducible, and understandable.
+Reflection	Limitations and future improvements are explained clearly and specifically.
+To earn Advanced, the project must be Complete and show strong evidence in at least four Advanced areas, including:
+
+Tool/data integration
+
+Evaluation
+
+Peer Support Groups
+Projects are individual, but students will participate in peer support groups.
+
+Peer support groups will be formed after the proposal stage so that students with similar project scopes, approaches, datasets, or tools can support one another.
+
+Peer support groups may help with:
+
+Refining project scope
+Suggesting datasets or tools
+Giving feedback on proposed test queries
+Troubleshooting conceptual issues
+Testing one another’s assistants
+Giving feedback on presentation clarity
+Identifying possible failure cases
+Peer support groups may not:
+
+Write code for another student
+Create prompts or evaluation tables for another student
+Produce another student’s artifacts
+Share substantial implementation files
+Submit shared work as individual work
+Make another student’s design decisions
+Each student remains individually responsible for their own project.
+
+README/Report
+The README/report should be short, functional, and useful for grading. It should help the instructor or ISA understand:
+
+What the assistant does
+Who the target users are
+How to run or access the assistant
+What data sources and tools are used
+Which models or configurations were compared
+How the assistant was evaluated
+What safety or robustness tests were conducted
+What limitations were identified
+What improvements could be made in the future
