@@ -1,45 +1,15 @@
 """build_filter tool loop, driven by a scripted fake client (no API calls)."""
 
 import json
-from types import SimpleNamespace
 
 import duckdb
 import pytest
 
 import build_filter as bf
+from fakes import FakeClient, response, text, tool_use
 from filter_spec import FIELDS
 
 B737 = {"where": {"aircraft_family": ["B737"]}}
-
-
-def text(t):
-    return SimpleNamespace(type="text", text=t)
-
-
-def tool_use(filters, id="t1"):
-    return SimpleNamespace(type="tool_use", id=id, name="build_filter", input={"filters": filters})
-
-
-def response(*content, stop_reason=None):
-    has_tool = any(b.type == "tool_use" for b in content)
-    return SimpleNamespace(
-        content=[SimpleNamespace(type="thinking", thinking=""), *content],
-        stop_reason=stop_reason or ("tool_use" if has_tool else "end_turn"),
-        model=bf.MODEL,
-        usage=SimpleNamespace(input_tokens=10, output_tokens=5, cache_creation_input_tokens=0,
-                              cache_read_input_tokens=100),
-    )
-
-
-class FakeClient:
-    def __init__(self, *responses):
-        self.responses = list(responses)
-        self.requests = []
-        self.beta = SimpleNamespace(messages=SimpleNamespace(create=self.create))
-
-    def create(self, **kwargs):
-        self.requests.append({**kwargs, "messages": list(kwargs["messages"])})
-        return self.responses.pop(0)
 
 
 @pytest.fixture

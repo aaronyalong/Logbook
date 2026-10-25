@@ -105,19 +105,17 @@ def to_sql(con, spec):
 
 
 def run(spec, con=None):
-    """Validate and execute a spec. Returns {"count", "acns"} or {"count", "groups"}."""
+    """Validate and execute a spec. Returns {"count", "acns"}, plus "groups" (value -> count) with group_by."""
     errors = validate(spec)
     if errors:
         raise ValueError("; ".join(errors))
     con = con or duckdb.connect(str(DB_PATH), read_only=True)
     where, params = to_sql(con, spec)
     acns = [a for (a,) in con.execute(f"SELECT r.acn FROM reports r WHERE {where} ORDER BY r.acn", params).fetchall()]
-    result = {"count": len(acns)}
+    result = {"count": len(acns), "acns": acns}
 
     field = spec.get("group_by")
-    if field is None:
-        result["acns"] = acns
-    else:
+    if field is not None:
         value = f"unnest(r.{field})" if _is_list_column(con, field) else f"r.{field}"
         rows = con.execute(
             f"SELECT v, count(*) AS n FROM (SELECT {value} AS v FROM reports r WHERE {where}) "

@@ -54,6 +54,7 @@ def test_run_matches(con, spec, acns):
 def test_group_by_list_column(con):
     result = run({"where": {"human_factors": ["Time Pressure"]}, "group_by": "anomaly"}, con)
     assert result["count"] == 2
+    assert result["acns"] == [2, 3]  # still returned, so retrieval can search the grouped reports
     assert result["groups"] == {
         "Deviation / Discrepancy - Procedural Maintenance": 2,
         "Aircraft Equipment Problem Critical": 1,
