@@ -2,7 +2,7 @@
 
 An LLM assistant for exploring the NASA Aviation Safety Reporting System (ASRS) maintenance corpus. Analysts ask questions in natural language. The assistant translates them into structured filters over ASRS coded fields, runs hybrid retrieval over the narrative text, and synthesizes an answer in which every claim cites a report by ACN.
 
-See the full [project proposal](proposal/CMPE259-Project-Proposal.pdf).
+[Project proposal](proposal/CMPE259-Project-Proposal.pdf)
 
 ## Status
 
