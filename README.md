@@ -43,6 +43,7 @@ User question
 | [evaluation/](evaluation) | Query set, gold filters, and evaluation scripts |
 | [tests/](tests) | Unit tests |
 | [demo/](demo) | Demo recordings and screenshots |
+| [IMPROVEMENTS.md](IMPROVEMENTS.md) | Improvements backlog: known issues and future work, in priority order |
 
 ## Data
 
@@ -172,6 +173,18 @@ Decisions made after examining the exported data, relative to the proposal:
   Narrative text is HTML-escaped so a report cannot close its own tag and inject instructions outside it. After generation, every cited ACN is sorted into three groups: verified (shown to the model), not shown (a real report the model was not given), or not in the corpus (fabricated). Only verified reports appear in the source list. Citations are plain text rather than the API's citation feature, so the local Ollama model in the comparison can follow exactly the same format. If no valid filter can be built, the whole corpus is searched and the model is told so.
 - **Interface.** The Streamlit app ([code/app.py](code/app.py)) calls the same `answer()` function as the command line and the evaluation, so what testers see is what gets evaluated. Each question is answered independently, so follow-ups do not see earlier answers. That keeps the evaluation single-turn and reproducible, but a follow-up like "tell me more about the second one" will not work.
 - **Aircraft family.** `make_model` has 225 distinct values; a derived `aircraft_family` column groups variants (e.g. B737-800, B737 MAX 9) so a question about "737s" matches all of them.
+
+## Known Limitations
+
+Found while building and smoke-testing. The [improvements backlog](IMPROVEMENTS.md) records the planned fix and how to measure it for each.
+
+- **Keyword matching matches inside words.** "MEL" also matches *timely* and *smell*, which inflates counts for keyword filters.
+- **The filter can search for non-topic words.** For query 19 (spacecraft), it searched for "NASA", which reporters mention when filing the ASRS form. The answer step caught the mistake.
+- **Failed citations are flagged, not corrected.** None occurred in 6 smoke-test queries.
+- **Long narratives are partly embedded.** 14% exceed the embedding model's input, so dense retrieval sees only their opening.
+- **No follow-up questions.** Each question is answered independently.
+- **Local only.** The app runs on the machine it is started on; hosting options are compared in the backlog.
+- **The data cannot support rates.** ASRS reports are voluntary and unverified, so the assistant reports corpus counts only, never real-world frequencies. This limitation is designed in, not a defect.
 
 ## Stack
 
