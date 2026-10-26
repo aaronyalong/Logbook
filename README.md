@@ -12,8 +12,8 @@ See the full [project proposal](proposal/CMPE259-Project-Proposal.pdf).
 | Filter tool: spec, validation, execution against DuckDB, Claude tool call | Complete (generated filters not yet scored against gold) |
 | Evaluation query set with gold filters | Complete |
 | Hybrid retrieval: BM25 + local embeddings, filtered, rank fusion | Complete |
-| Answer step: cited synthesis, post-generation citation check | Complete (not yet run against the API) |
-| Streamlit interface | Planned |
+| Answer step: cited synthesis, post-generation citation check | Complete (smoke-tested on 6 queries) |
+| Streamlit interface | Complete |
 | Model comparison, safety testing, peer testing | Planned |
 
 ## Pipeline
@@ -34,7 +34,7 @@ User question
 |------|----------|
 | [proposal/](proposal) | Project proposal |
 | [checkins/](checkins) | Progress check-in submissions |
-| [code/](code) | Pipeline source: abbreviation parsing, preprocessing, profiling, filter spec, filter tool call, retrieval, answer step |
+| [code/](code) | Pipeline source: abbreviation parsing, preprocessing, profiling, filter spec, filter tool call, retrieval, answer step, Streamlit interface |
 | [data/raw/](data/raw) | ASRS export (CSV) and the search criteria used to produce it |
 | [data/reference/](data/reference) | ASRS Coding Taxonomy and Abbreviations (PDF), parsed abbreviation tables (JSON) |
 | [data/profile/](data/profile) | Generated corpus statistics and the observed value inventory for each filterable field |
@@ -71,6 +71,21 @@ source .venv/bin/activate
 pip install -r code/requirements.txt        # add -dev for the test suite
 export ANTHROPIC_API_KEY=...                 # for the LLM steps only; tests do not need it
 ```
+
+## Running the Assistant
+
+```bash
+streamlit run code/app.py      # opens http://localhost:8501
+```
+
+Type a question or pick an example from the sidebar. Each answer shows:
+- cited reports highlighted (blue if verified, red with ⚠ if a citation failed the check)
+- source cards with the ASRS synopsis and full narratives
+- a "How this answer was built" panel with the filter, match counts, and retrieved narratives
+
+The sidebar switches retrieval between hybrid and the dense-only baseline. Thumbs up/down and comments on each answer are saved to `logs/feedback.jsonl` for the peer-testing summary. A question takes about 15–30 seconds and costs roughly $0.10 in API usage.
+
+`data/asrs.duckdb` must exist first; build it with the steps below.
 
 ## Usage
 
@@ -135,7 +150,7 @@ pip install -r code/requirements-dev.txt
 pytest
 ```
 
-The unit tests cover abbreviation parsing and expansion, value normalization, aircraft family mapping, filter validation and execution, the build_filter tool loop (against a scripted fake client, so no API key is needed), retrieval ranking and fusion (with a toy embedder, so no model download is needed), the answer step's context building and citation check, and consistency of the evaluation query set. A GitHub Actions workflow ([project-tests.yml](../.github/workflows/project-tests.yml)) runs them on every push that touches `project/`. It also rebuilds the pipeline from the raw export and fails if any committed generated file, including the embedding index, is out of date.
+The unit tests cover abbreviation parsing and expansion, value normalization, aircraft family mapping, filter validation and execution, the build_filter tool loop (against a scripted fake client, so no API key is needed), retrieval ranking and fusion (with a toy embedder, so no model download is needed), the answer step's context building and citation check, the Streamlit app (a smoke test through Streamlit's test harness with a fake client and a tiny database), and consistency of the evaluation query set. A GitHub Actions workflow ([project-tests.yml](../.github/workflows/project-tests.yml)) runs them on every push that touches `project/`. It also rebuilds the pipeline from the raw export and fails if any committed generated file, including the embedding index, is out of date.
 
 ## Design Notes
 
@@ -155,8 +170,9 @@ Decisions made after examining the exported data, relative to the proposal:
   - treat narrative text as untrusted data
 
   Narrative text is HTML-escaped so a report cannot close its own tag and inject instructions outside it. After generation, every cited ACN is sorted into three groups: verified (shown to the model), not shown (a real report the model was not given), or not in the corpus (fabricated). Only verified reports appear in the source list. Citations are plain text rather than the API's citation feature, so the local Ollama model in the comparison can follow exactly the same format. If no valid filter can be built, the whole corpus is searched and the model is told so.
+- **Interface.** The Streamlit app ([code/app.py](code/app.py)) calls the same `answer()` function as the command line and the evaluation, so what testers see is what gets evaluated. Each question is answered independently, so follow-ups do not see earlier answers. That keeps the evaluation single-turn and reproducible, but a follow-up like "tell me more about the second one" will not work.
 - **Aircraft family.** `make_model` has 225 distinct values; a derived `aircraft_family` column groups variants (e.g. B737-800, B737 MAX 9) so a question about "737s" matches all of them.
 
 ## Stack
 
-Python · DuckDB (metadata filter) · `rank_bm25` and `BAAI/bge-small-en-v1.5` via `fastembed`, with NumPy similarity search (hybrid retrieval) · Anthropic API (filter tool call) · planned: Streamlit, Ollama (model comparison)
+Python · DuckDB (metadata filter) · `rank_bm25` and `BAAI/bge-small-en-v1.5` via `fastembed`, with NumPy similarity search (hybrid retrieval) · Anthropic API (filter tool call and answer) · Streamlit (interface) · planned: Ollama (model comparison)

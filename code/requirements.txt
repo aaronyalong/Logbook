@@ -6,3 +6,4 @@ pandas==3.0.6
 pdfplumber==0.11.10
 pyarrow==26.0.0
 rank-bm25==0.2.2
+streamlit==1.66.1

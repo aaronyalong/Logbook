@@ -96,13 +96,18 @@ def render_context(filter_record, sides, info):
 
 
 def answer(question, client=None, retriever=None, con=None, mode="hybrid",
-           log_path=LOG_PATH, filter_log_path=bf.LOG_PATH):
+           log_path=LOG_PATH, filter_log_path=bf.LOG_PATH, on_step=None):
     """Returns a record with status ("ok" or "refusal"), answer text, citation check, sources
-    (the verified reports), the filter used, and what was retrieved."""
+    (the verified reports), the filter used, and what was retrieved.
+
+    on_step, if given, is called with "filter", "retrieve", and "answer" as each stage starts.
+    """
     client = client or anthropic.Anthropic()
     con = con or duckdb.connect(str(DB_PATH), read_only=True)
     retriever = retriever or retrieve.load(con)
+    step = on_step or (lambda stage: None)
 
+    step("filter")
     filt = bf.build_filter(question, client=client, con=con, log_path=filter_log_path)
     record = {"question": question, "status": "refusal", "answer": "", "citations": None, "sources": [],
               "filter": {"status": filt["status"], "filters": filt["filters"],
@@ -115,12 +120,14 @@ def answer(question, client=None, retriever=None, con=None, mode="hybrid",
         sides = [{"spec": s, "result": r} for s, r in zip(filt["filters"], filt["results"])]
     else:
         sides = [{"spec": None, "result": None}]
+    step("retrieve")
     for side in sides:
         acns = side["result"]["acns"] if side["result"] else None
         side["hits"] = retriever.search(question, acns, TOP_K, mode)
     shown = {h["acn"] for side in sides for h in side["hits"]}
     info = report_info(shown, con)
 
+    step("answer")
     response = client.beta.messages.create(
         model=MODEL,
         max_tokens=16000,
