@@ -14,7 +14,8 @@ An LLM assistant for exploring the NASA Aviation Safety Reporting System (ASRS) 
 | Hybrid retrieval: BM25 + local embeddings, filtered, rank fusion | Complete |
 | Answer step: cited synthesis, post-generation citation check | Complete (smoke-tested on 6 queries) |
 | Streamlit interface | Complete |
-| Model comparison, safety testing, peer testing | Planned |
+| Model comparison | In progress: filter-step [screening](evaluation/model_screening.md) of 2 Claude and 5 local models done; full runs planned |
+| Safety testing, peer testing | Planned |
 
 ## Pipeline
 

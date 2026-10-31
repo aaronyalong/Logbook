@@ -104,3 +104,22 @@ This is now only a prompt variant in [prompts/](prompts). Do it only after the i
 
 ### 7.1 Review the abbreviation expansion by hand
 This was in progress at check-in 1. Read expansions in a sample of narratives, and fix mis-expansions with `overrides` or `do_not_expand` in [maintenance_abbreviations.json](data/reference/maintenance_abbreviations.json). Then rebuild the database and the embedding index. Until the index is rebuilt, retrieval refuses to load it, which is intended.
+
+## 8. From the model screening
+
+Found in the [filter-step screening](evaluation/model_screening.md) of Claude and five local models. Apply each fix to every model, so the comparison stays fair, and rerun the screening afterward.
+
+### 8.1 Handle a `filters` list sent as a JSON string
+`llama3.1:8b` chose correct filters but sent the list as a text string, and all 9 of its calls were rejected. Either decode the string once before validating, or reject it with a message that says a string was sent where a list is expected. Where: `execute()` in [code/build_filter.py](code/build_filter.py).
+
+### 8.2 Make rejection messages say where a field belongs
+`qwen2.5` and `qwen3.5` put `year_min` and `year_max` inside `where`, and `gpt-oss` put field names at the top level. The current message, "unknown field 'year_max'", does not say where the field goes, and `qwen3.5` responded by deleting the years. Where: `validate()` in [code/filter_spec.py](code/filter_spec.py).
+
+### 8.3 List field values without counts in the prompt
+`gemma4:12b` copied the `{value: count}` table into a filter as if it were a value. List plain values per field, and show counts separately or not at all. Measure the effect on the hosted models too. Where: `system_prompt()` in [code/build_filter.py](code/build_filter.py).
+
+### 8.4 Try `qwen3:30b-a3b` with thinking on
+With thinking off, it wrote its reasoning as text and made no tool call on 2 of 3 questions. Test thinking on as a separate configuration, and expect it to be slower.
+
+### 8.5 Repeat runs before ranking models
+Claude Haiku gave a different query-19 filter on each of its two runs. Screen with 2–3 runs per model (see 2.4).
