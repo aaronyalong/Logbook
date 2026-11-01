@@ -16,6 +16,7 @@ NARRATIVES = [
     (1, 1, "Shift turnover was rushed and the MLG inspection was missed."),
     (2, 1, "Item deferred per MEL."),
     (3, 1, "Borescope inspection of the engine."),
+    (3, 2, "Extremely tight access; two more checks\nscheduled."),
     (4, 1, "Routine check."),
     (4, 2, "Second reporter: the HANDOFF to the night crew was incomplete."),
 ]
@@ -42,6 +43,12 @@ def con():
     ({"text_any": ["turnover"]}, [1]),
     ({"text_any": ["handoff"]}, [4]),                                                # case-insensitive, any narrative
     ({"text_any": ["turnover", "handoff"]}, [1, 4]),
+    ({"text_any": ["MEL"]}, [2]),                                                    # whole words: not "extremely"
+    ({"text_any": ["defer"]}, []),
+    ({"text_any": ["defer*"]}, [2]),                                                 # trailing * matches a prefix
+    ({"text_any": ["check"]}, [3, 4]),                                               # plurals included
+    ({"text_any": ["checks scheduled"]}, [3]),                                       # phrases span any whitespace
+    ({"text_any": ["hand-off"]}, []),
     ({"acn": [3]}, [3]),
     ({"acn": [999]}, []),
 ])
@@ -79,6 +86,11 @@ def test_run_rejects_invalid_spec(con):
     ("B737", "must be a JSON object"),
     ({"aircraft": "B737"}, "unknown key 'aircraft'"),
     ({"where": {"aircraft_type": ["B737"]}}, "unknown field 'aircraft_type'"),
+    # misplaced keys say where they belong
+    ({"aircraft_family": ["B737"]}, "'aircraft_family' is a coded field; put it inside 'where'"),
+    ({"where": {"year_min": 2022}}, "'year_min' goes at the top level of the filter, not inside 'where'"),
+    ({"where": {"year": [2022]}}, "use 'year_min' and 'year_max'"),
+    ({"year": 2022}, "use 'year_min' and 'year_max'"),
     ({"where": {"aircraft_family": ["Boeing 737"]}}, "'Boeing 737' is not a value of 'aircraft_family'"),
     ({"where": {"aircraft_family": []}}, "must be a non-empty list"),
     ({"where": {"aircraft_family": "B737"}}, "must be a non-empty list"),
@@ -87,6 +99,8 @@ def test_run_rejects_invalid_spec(con):
     ({"year_min": 2024, "year_max": 2020}, "'year_min' is after 'year_max'"),
     ({"acn": ["1884087"]}, "'acn' must be a list of integers"),
     ({"text_any": [""]}, "'text_any' must be a list of non-empty strings"),
+    ({"text_any": ["*defer"]}, "'*' is allowed only once, at the end of a term"),
+    ({"text_any": ["*"]}, "must contain a letter or digit"),
     ({"group_by": "airline"}, "cannot group by unknown field 'airline'"),
     # malformed shapes an LLM might produce: reported, not raised
     ({"where": ["B737"]}, "'where' must be an object"),

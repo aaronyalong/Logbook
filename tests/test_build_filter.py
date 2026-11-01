@@ -43,6 +43,7 @@ def test_system_prompt_lists_values():
     for field in FIELDS:
         assert f"- `{field}`:" in prompt
     assert '"Electrical Wiring & Connectors"' in prompt
+    assert '"B737": ' not in prompt  # plain values, no {value: count} map to copy
 
 
 def test_accepted_call(con):
@@ -83,8 +84,8 @@ def test_rejected_call_is_explained_and_corrected(con):
 
 
 def test_comparison_returns_one_result_per_filter(con):
-    filters = [{"year_min": 2019, "year_max": 2019, "text_any": ["defer"]},
-               {"year_min": 2023, "year_max": 2023, "text_any": ["defer"]}]
+    filters = [{"year_min": 2019, "year_max": 2019, "text_any": ["defer*"]},
+               {"year_min": 2023, "year_max": 2023, "text_any": ["defer*"]}]
     record, _ = run_tool(con, response(tool_use(filters)), response(text("2019 vs 2023.")))
     assert [r["acns"] for r in record["results"]] == [[1], [3]]
 
@@ -128,12 +129,20 @@ def test_refusal(con):
     ({}, "'filters' must be a non-empty list"),
     ({"filters": []}, "'filters' must be a non-empty list"),
     ({"filters": B737}, "'filters' must be a non-empty list"),
+    ({"filters": "not json"}, "'filters' must be a non-empty list"),
     ({"filters": [B737, {"where": ["B737"]}]}, "filters[1]: 'where' must be an object"),
 ])
 def test_execute_rejects_malformed_input(con, tool_input, message):
     call = bf.execute(tool_input, con)
     assert any(message in e for e in call["errors"])
     assert "results" not in call
+
+
+def test_execute_decodes_filters_sent_as_json_text(con):
+    call = bf.execute({"filters": json.dumps([B737])}, con)
+    assert call["errors"] == []
+    assert call["filters"] == [B737]
+    assert call["results"][0]["count"] == 2
 
 
 def test_log_records_calls_without_acn_lists(con, tmp_path):

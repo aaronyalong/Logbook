@@ -44,7 +44,8 @@ SPEC_SCHEMA = {
         },
         "text_any": {
             "type": "array", "items": {"type": "string"},
-            "description": "Match reports where any narrative contains one of these terms (case-insensitive).",
+            "description": ("Match reports where any narrative contains one of these words (case-insensitive, "
+                            "plurals included). End a term with * to match it as a prefix."),
         },
         "group_by": {"type": "string", "enum": list(FIELDS), "description": "Return value counts for this field."},
     },
@@ -73,19 +74,27 @@ TOOL = {
 
 
 def system_prompt():
-    values = "\n".join(f"- `{f}`: {json.dumps(v)}" for f, v in FILTER_VALUES.items() if f != "year")
+    # Plain lists, most common first: a {value: count} map invited models to copy it into a filter.
+    values = "\n".join(f"- `{f}`: {json.dumps(list(v))}" for f, v in FILTER_VALUES.items() if f != "year")
     return PROMPT_PATH.read_text().replace("<<FIELD_VALUES>>", values)
 
 
 def execute(tool_input, con):
-    """Validate and run one build_filter call. Returns {"input", "errors"} plus "results" if accepted."""
+    """Validate and run one build_filter call. Returns {"input", "errors"} plus "filters" and "results" if accepted."""
     filters = tool_input.get("filters") if isinstance(tool_input, dict) else None
+    if isinstance(filters, str):
+        # Some local models send the list as JSON text; the content is often right, so decode it once.
+        try:
+            filters = json.loads(filters)
+        except json.JSONDecodeError:
+            pass
     if not (isinstance(filters, list) and filters):
         errors = ["'filters' must be a non-empty list of filter specs"]
     else:
         errors = [f"filters[{i}]: {e}" for i, spec in enumerate(filters) for e in validate(spec)]
     call = {"input": tool_input, "errors": errors}
     if not errors:
+        call["filters"] = filters
         call["results"] = [run(spec, con) for spec in filters]
     return call
 
@@ -156,7 +165,7 @@ def build_filter(question, client=None, con=None, model=MODEL, log_path=LOG_PATH
         "question": question,
         "model": response.model,
         "status": status,
-        "filters": accepted["input"]["filters"] if accepted else None,
+        "filters": accepted["filters"] if accepted else None,
         "results": accepted["results"] if accepted else None,
         "calls": calls,
         "explanation": "".join(b.text for b in response.content if b.type == "text").strip(),

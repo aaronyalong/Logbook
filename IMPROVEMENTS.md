@@ -14,6 +14,7 @@ Items tagged with a grading area strengthen one of the course's Advanced areas. 
 - **Decision:** match at the start of a word (`\bterm`), match whole words with an optional plural, or let the model mark each term as exact or prefix.
 - **Where:** `to_sql()` in [code/filter_spec.py](code/filter_spec.py), the `text_any` guidance in [prompts/build_filter_system.md](prompts/build_filter_system.md), and tests in [tests/test_filter_spec.py](tests/test_filter_spec.py). The gold filters for queries 7, 10, and 18 use `text_any`, so rerun `evaluation/check_gold_filters.py` and commit the changed counts.
 - **Measure:** gold-filter counts before and after, plus a spot check of the reports each term matches.
+- **Done:** terms match whole words with an optional -s/-es plural, and a trailing `*` matches a prefix. Corpus-wide, "MEL" went from 503 reports to 405 and "ISS" from 1,114 to 0; "defer" matches 86 as a word and 330 as `defer*`. Query 10's gold filter became `defer*` and still matches 30 / 12. Query 7 went from 117 to 116: the report lost (ACN 1806415) matched only because "shift changed" contains "shift change". Query 18 is unchanged at 19.
 
 ### 1.2 The filter searches for words that are not topics
 *Grading area: robustness*
@@ -21,6 +22,7 @@ Items tagged with a grading area strengthen one of the course's Advanced areas. 
 - **Observed:** for query 19 (spacecraft), the filter searched for "NASA" and matched 8 reports in which mechanics mention filing a *NASA ASRS* form. The answer step caught it and correctly said that no reports involve spacecraft.
 - **Decision:** add a general note to the filter prompt: reporters often mention NASA, ASRS, or "this report" when referring to the reporting program, so those words do not indicate a topic. This failure was found on an evaluation query, so record the fix as such; it slightly contaminates that query.
 - **Where:** [prompts/build_filter_system.md](prompts/build_filter_system.md).
+- **Done:** the prompt now says NASA, ASRS, and "this report" are not topics. The rescreen checks whether query 19 still searches for "NASA".
 
 ### 1.3 Failed citations are flagged but not enforced
 *Grading area: grounding*
@@ -110,13 +112,13 @@ This was in progress at check-in 1. Read expansions in a sample of narratives, a
 Found in the [filter-step screening](evaluation/model_screening.md) of Claude and five local models. Apply each fix to every model, so the comparison stays fair, and rerun the screening afterward.
 
 ### 8.1 Handle a `filters` list sent as a JSON string
-`llama3.1:8b` chose correct filters but sent the list as a text string, and all 9 of its calls were rejected. Either decode the string once before validating, or reject it with a message that says a string was sent where a list is expected. Where: `execute()` in [code/build_filter.py](code/build_filter.py).
+`llama3.1:8b` chose correct filters but sent the list as a text string, and all 9 of its calls were rejected. Either decode the string once before validating, or reject it with a message that says a string was sent where a list is expected. Where: `execute()` in [code/build_filter.py](code/build_filter.py). **Done:** decoded once before validation; text that is not valid JSON is still rejected.
 
 ### 8.2 Make rejection messages say where a field belongs
-`qwen2.5` and `qwen3.5` put `year_min` and `year_max` inside `where`, and `gpt-oss` put field names at the top level. The current message, "unknown field 'year_max'", does not say where the field goes, and `qwen3.5` responded by deleting the years. Where: `validate()` in [code/filter_spec.py](code/filter_spec.py).
+`qwen2.5` and `qwen3.5` put `year_min` and `year_max` inside `where`, and `gpt-oss` put field names at the top level. The current message, "unknown field 'year_max'", does not say where the field goes, and `qwen3.5` responded by deleting the years. Where: `validate()` in [code/filter_spec.py](code/filter_spec.py). **Done:** a coded field at the top level is told to go inside `where`, and `year_min`, `year_max`, and the other top-level keys inside `where` are told to go at the top level. For `gpt-oss`'s split filter, the prompt now also says that separate filters are never combined.
 
 ### 8.3 List field values without counts in the prompt
-`gemma4:12b` copied the `{value: count}` table into a filter as if it were a value. List plain values per field, and show counts separately or not at all. Measure the effect on the hosted models too. Where: `system_prompt()` in [code/build_filter.py](code/build_filter.py).
+`gemma4:12b` copied the `{value: count}` table into a filter as if it were a value. List plain values per field, and show counts separately or not at all. Measure the effect on the hosted models too. Where: `system_prompt()` in [code/build_filter.py](code/build_filter.py). **Done:** values are listed as plain lists, most common first, with one example of a `where` clause. Per-field coverage stays in the field reference.
 
 ### 8.4 Try `qwen3:30b-a3b` with thinking on
 With thinking off, it wrote its reasoning as text and made no tool call on 2 of 3 questions. Test thinking on as a separate configuration, and expect it to be slower.

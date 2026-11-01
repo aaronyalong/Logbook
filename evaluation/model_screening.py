@@ -83,7 +83,7 @@ def check(model, query, con):
     gold_counts = [run(s, con)["count"] for s in (gold if isinstance(gold, list) else [gold])] if gold else None
     return {"model": model, "id": query["id"], "seconds": round(time.time() - start),
             "status": "ok" if accepted else ("invalid" if calls else "no_call"),
-            "filters": accepted["input"].get("filters") if accepted else None,
+            "filters": accepted["filters"] if accepted else None,
             "counts": [x["count"] for x in accepted["results"]] if accepted else None,
             "gold_counts": gold_counts, "calls": calls, "final_text": text[:400], "timing": timing}
 

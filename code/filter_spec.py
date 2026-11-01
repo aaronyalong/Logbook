@@ -6,7 +6,7 @@ A filter spec is a JSON object; every key is optional:
     "year_min": 2022, "year_max": 2024,       # inclusive incident-year bounds
     "where": {"aircraft_family": ["B737"],    # coded fields: OR within a field, AND across fields;
               "human_factors": ["Fatigue"]},  #   list-valued fields match if any value overlaps
-    "text_any": ["handoff", "turnover"],      # some narrative contains one of these (case-insensitive)
+    "text_any": ["handoff", "defer*"],        # some narrative contains one of these words (see term_pattern)
     "group_by": "anomaly"                     # return counts per value instead of matching ACNs
   }
 
@@ -15,6 +15,7 @@ so an invented category is rejected rather than silently matching nothing.
 """
 
 import json
+import re
 
 import duckdb
 
@@ -26,11 +27,36 @@ FIELDS = {f: set(v) for f, v in FILTER_VALUES.items() if f != "year"}
 KEYS = {"acn", "year_min", "year_max", "where", "text_any", "group_by"}
 
 
+def term_pattern(term):
+    """Regex for a text_any term: a whole word, case-insensitive, with an optional -s/-es plural.
+
+    A trailing '*' matches the term as a word prefix instead ("defer*" matches deferred and deferral),
+    and the words of a phrase may be separated by any whitespace. Whole words keep "MEL" from
+    matching inside "extremely" and "ISS" from matching inside "missing".
+    """
+    prefix = term.endswith("*")
+    words = term.rstrip("*").split()
+    body = r"\s+".join(re.escape(w) for w in words)
+    start = r"\b" if re.match(r"\w", words[0]) else ""
+    if prefix:
+        end = r"\w*"
+    else:
+        end = r"(s|es)?\b" if re.search(r"\w$", words[-1]) else ""
+    return "(?i)" + start + body + end
+
+
 def validate(spec):
     """Return a list of human-readable problems; an empty list means the spec is valid."""
     if not isinstance(spec, dict):
         return ["filter spec must be a JSON object"]
-    errors = [f"unknown key '{k}'" for k in spec if k not in KEYS]
+    errors = []
+    for key in spec:
+        if key in FIELDS:
+            errors.append(f"'{key}' is a coded field; put it inside 'where', as {{\"where\": {{\"{key}\": [...]}}}}")
+        elif key == "year":
+            errors.append("unknown key 'year'; use 'year_min' and 'year_max'")
+        elif key not in KEYS:
+            errors.append(f"unknown key '{key}'; the keys are {', '.join(sorted(KEYS))}")
 
     acns = spec.get("acn", [])
     if not (isinstance(acns, list) and all(isinstance(a, int) for a in acns)):
@@ -52,7 +78,10 @@ def validate(spec):
         errors.append("'where' must be an object mapping field names to lists of values")
         where = {}
     for field, values in where.items():
-        if field not in FIELDS:
+        if field in KEYS or field == "year":
+            errors.append(f"'{field}' goes at the top level of the filter, not inside 'where'"
+                          + ("; use 'year_min' and 'year_max'" if field == "year" else ""))
+        elif field not in FIELDS:
             errors.append(f"unknown field '{field}'")
         elif not (isinstance(values, list) and values):
             errors.append(f"'where.{field}' must be a non-empty list")
@@ -63,6 +92,12 @@ def validate(spec):
     terms = spec.get("text_any", [])
     if not (isinstance(terms, list) and all(isinstance(t, str) and t.strip() for t in terms)):
         errors.append("'text_any' must be a list of non-empty strings")
+    else:
+        for t in terms:
+            if "*" in t.rstrip("*") or t.endswith("**"):
+                errors.append(f"text_any term '{t}': '*' is allowed only once, at the end of a term")
+            elif not re.search(r"\w", t):
+                errors.append(f"text_any term '{t}' must contain a letter or digit")
 
     group_by = spec.get("group_by")
     if group_by is not None and not (isinstance(group_by, str) and group_by in FIELDS):
@@ -98,9 +133,9 @@ def to_sql(con, spec):
             clauses.append(f"r.{field} IN (SELECT unnest(?::VARCHAR[]))")
         params.append(values)
     if spec.get("text_any"):
-        likes = " OR ".join("n.text ILIKE ?" for _ in spec["text_any"])
-        clauses.append(f"EXISTS (SELECT 1 FROM narratives n WHERE n.acn = r.acn AND ({likes}))")
-        params += [f"%{t}%" for t in spec["text_any"]]
+        matches = " OR ".join("regexp_matches(n.text, ?)" for _ in spec["text_any"])
+        clauses.append(f"EXISTS (SELECT 1 FROM narratives n WHERE n.acn = r.acn AND ({matches}))")
+        params += [term_pattern(t) for t in spec["text_any"]]
     return (" AND ".join(clauses) or "TRUE"), params
 
 

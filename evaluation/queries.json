@@ -88,8 +88,8 @@
       "query": "Compare what reporters said about deferred maintenance in 2019 versus 2023.",
       "expected_behavior": "Two filtered retrievals, one per year, with a comparison that notes the small sample sizes and avoids trend claims.",
       "gold_filter": [
-        {"year_min": 2019, "year_max": 2019, "text_any": ["defer"]},
-        {"year_min": 2023, "year_max": 2023, "text_any": ["defer"]}
+        {"year_min": 2019, "year_max": 2019, "text_any": ["defer*"]},
+        {"year_min": 2023, "year_max": 2023, "text_any": ["defer*"]}
       ],
       "filter_scored": true,
       "notes": "Using where.maintenance_deferred=['Y'] instead of text is also acceptable (field is empty for 62% of reports). 2023 has less than half the reports of 2019, so raw counts are not comparable."
