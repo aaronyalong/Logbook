@@ -22,7 +22,7 @@ Items tagged with a grading area strengthen one of the course's Advanced areas. 
 - **Observed:** for query 19 (spacecraft), the filter searched for "NASA" and matched 8 reports in which mechanics mention filing a *NASA ASRS* form. The answer step caught it and correctly said that no reports involve spacecraft.
 - **Decision:** add a general note to the filter prompt: reporters often mention NASA, ASRS, or "this report" when referring to the reporting program, so those words do not indicate a topic. This failure was found on an evaluation query, so record the fix as such; it slightly contaminates that query.
 - **Where:** [prompts/build_filter_system.md](prompts/build_filter_system.md).
-- **Done:** the prompt now says NASA, ASRS, and "this report" are not topics. The rescreen checks whether query 19 still searches for "NASA".
+- **Done:** the prompt now says NASA, ASRS, and "this report" are not topics. In the round 2 screening, "NASA" was searched in 1 of 6 Claude runs, down from 2 of 3. Other words used in a different sense ("space", "booster", "satellite") still appear; see 8.7.
 
 ### 1.3 Failed citations are flagged but not enforced
 *Grading area: grounding*
@@ -121,7 +121,19 @@ Found in the [filter-step screening](evaluation/model_screening.md) of Claude an
 `gemma4:12b` copied the `{value: count}` table into a filter as if it were a value. List plain values per field, and show counts separately or not at all. Measure the effect on the hosted models too. Where: `system_prompt()` in [code/build_filter.py](code/build_filter.py). **Done:** values are listed as plain lists, most common first, with one example of a `where` clause. Per-field coverage stays in the field reference.
 
 ### 8.4 Try `qwen3:30b-a3b` with thinking on
-With thinking off, it wrote its reasoning as text and made no tool call on 2 of 3 questions. Test thinking on as a separate configuration, and expect it to be slower.
+With thinking off, it wrote its reasoning as text and made no tool call on 2 of 3 questions. Test thinking on as a separate configuration, and expect it to be slower. **Done in round 2:** it gave the same filters with thinking on. Thinking only moved the reasoning out of the reply, which showed the real failure (see 8.6).
 
 ### 8.5 Repeat runs before ranking models
-Claude Haiku gave a different query-19 filter on each of its two runs. Screen with 2–3 runs per model (see 2.4).
+Claude Haiku gave a different query-19 filter on each of its two runs. Screen with 2–3 runs per model (see 2.4). **Done in round 2:** 3 runs per Claude model and 2 per local model.
+
+### 8.6 Read a tool call written as plain JSON in the reply
+*Decide before the full run.* `qwen3:30b-a3b` wrote the exact gold filter for query 6 as `{"name": "build_filter", "arguments": {...}}` in its reply, without the tags Ollama needs to recognize a tool call. The arguments were also a single filter spec, without the `filters` list. Options: when a reply has no tool call, parse a JSON `build_filter` call out of the text, and accept a single spec in place of the list; or force the output format with Ollama's `format` option (constrained decoding, the proposal's Section 8 fallback). The first matches 8.1 and applies to every model; Claude never triggers it. Where: `execute()` in [code/build_filter.py](code/build_filter.py), and the Ollama call. Measure: rerun `qwen3:30b-a3b` on queries 6 and 19.
+
+### 8.7 Words used in a different sense
+Keyword filters for query 19 matched "space" (hangar space), "booster" (oxygen booster carts), and "satellite" (a SatCom system). Whole-word matching cannot fix this, because the words are real words used in another sense. Leave it to the answer step, which should find no spacecraft in these reports, and check that it does in the full run.
+
+### 8.8 A coded value repeated as a keyword
+`gemma4:12b` added `text_any: ["B737*"]` to the B737 filter, which cut 109 reports to 4, because narratives rarely name the aircraft type. A prompt line could say not to repeat a coded value as a keyword. Measure the effect on every model, since it changes the shared prompt.
+
+### 8.9 Tool calls that Ollama cannot parse
+`gpt-oss:20b` sent query 10's tool call with a closing brace missing, and Ollama returned a server error before the pipeline saw it. Its content was the accepted alternative. This cannot be fixed in `execute()`; it would need Ollama's raw output or constrained decoding (see 8.6). Record it as a model failure for now.
