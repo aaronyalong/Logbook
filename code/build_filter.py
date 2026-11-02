@@ -20,7 +20,7 @@ import time
 import anthropic
 import duckdb
 
-from filter_spec import FIELDS, FILTER_VALUES, run, validate
+from filter_spec import FIELDS, FILTER_VALUES, KEYS, run, validate
 from preprocess import DB_PATH, ROOT
 
 MODEL = "claude-opus-5-5"
@@ -79,8 +79,35 @@ def system_prompt():
     return PROMPT_PATH.read_text().replace("<<FIELD_VALUES>>", values)
 
 
+def parse_text_call(text):
+    """Find a build_filter call that a model wrote as JSON in its reply instead of making a tool call.
+
+    Some local models write {"name": "build_filter", "arguments": {...}} as plain text, without the
+    tags their server needs to recognize a tool call. Returns the arguments, or None.
+    """
+    decoder = json.JSONDecoder()
+    for i, char in enumerate(text):
+        if char != "{":
+            continue
+        try:
+            obj, _ = decoder.raw_decode(text, i)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict) and obj.get("name") == TOOL["name"] and "arguments" in obj:
+            args = obj["arguments"]
+            if isinstance(args, str):
+                try:
+                    args = json.loads(args)
+                except json.JSONDecodeError:
+                    return None
+            return args
+    return None
+
+
 def execute(tool_input, con):
     """Validate and run one build_filter call. Returns {"input", "errors"} plus "filters" and "results" if accepted."""
+    if isinstance(tool_input, dict) and "filters" not in tool_input and set(tool_input) & KEYS:
+        tool_input = {"filters": [tool_input]}  # a single spec sent without the list around it
     filters = tool_input.get("filters") if isinstance(tool_input, dict) else None
     if isinstance(filters, str):
         # Some local models send the list as JSON text; the content is often right, so decode it once.

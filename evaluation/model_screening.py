@@ -29,7 +29,7 @@ from filter_spec import run  # noqa: E402
 
 THINKING = {"qwen3", "qwen3.5", "gemma4"}  # think can be switched off; gpt-oss only goes down to "low"
 OUT = ROOT / "evaluation/results/model_screening.jsonl"
-ROUND = 2  # round 1: 2026-10-30, before the fixes in backlog section 8
+ROUND = 3  # 1: before the backlog section 8 fixes; 2: after them; 3: after reading tool calls written as text (8.6)
 
 
 def chat(model, messages, think=False):
@@ -77,8 +77,12 @@ def check(model, query, con, think=False):
         msg = r["message"]
         text = msg.get("content", "")
         tool_calls = msg.get("tool_calls") or []
+        from_text = False
         if not tool_calls:
-            break
+            args = bf.parse_text_call(text)
+            if args is None:
+                break
+            tool_calls, from_text = [{"function": {"name": bf.TOOL["name"], "arguments": args}}], True
         messages.append(msg)
         for tc in tool_calls:
             args = tc["function"].get("arguments", {})
@@ -89,7 +93,7 @@ def check(model, query, con, think=False):
                     args = {"_unparseable": args}
             call = bf.execute(args, con)
             calls.append({"name": tc["function"].get("name"), "input": args, "errors": call["errors"],
-                          "counts": [x["count"] for x in call.get("results", [])]})
+                          "counts": [x["count"] for x in call.get("results", [])], "from_text": from_text})
             if not call["errors"]:
                 accepted = call
             messages.append({"role": "tool", "tool_name": "build_filter", "content": bf.tool_output(call)})
@@ -112,7 +116,7 @@ def main():
     args = parser.parse_args()
     queries = {q["id"]: q for q in json.loads((ROOT / "evaluation/queries.json").read_text())["queries"]}
     con = duckdb.connect(str(ROOT / "data/asrs.duckdb"), read_only=True)
-    commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    commit = subprocess.run(["git", "describe", "--always", "--dirty"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
     claude = args.model.startswith("claude")
     for run_no in range(1, args.runs + 1):
         for qid in args.ids:

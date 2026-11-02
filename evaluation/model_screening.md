@@ -5,8 +5,9 @@ A screening, done before choosing which models to include in the full Axis A com
 There were two rounds:
 - **Round 1** (2026-10-30): one run per model, mostly. It found failures on the pipeline side, which were then fixed.
 - **Round 2** (2026-11-01): the same queries after the fixes, with 3 runs per Claude model and 2 per local model.
+- **Round 3** (2026-11-01): `qwen3:30b-a3b` only, after the pipeline started reading tool calls that a model writes as JSON in its reply.
 
-Raw records: [results/model_screening.jsonl](results/model_screening.jsonl). Round 2 records carry `round`, `run`, and the `commit` they ran on. Script: [model_screening.py](model_screening.py).
+Raw records: [results/model_screening.jsonl](results/model_screening.jsonl). Records from rounds 2 and 3 carry `round`, `run`, and the `commit` they ran on. A call read from the reply text is marked `from_text`. Script: [model_screening.py](model_screening.py).
 
 ## Setup
 
@@ -68,9 +69,29 @@ What the 🟡 counts on query 19 matched: "satellite" matches 2 reports (a SatCo
 6. **Temperature 0 is not fully deterministic.** `gpt-oss` gave different second and third calls on Q6 in its two runs. Every other local model repeated itself exactly.
 7. **Words unrelated to the topic still leak into keyword filters.** "NASA" became rarer, but "space", "booster", and "satellite" all match reports about other things. Whole-word matching cannot fix this, because the words are used correctly, just in a different sense. The answer step has to reject them.
 
-### Choosing local models for the full run
+## Round 3: reading tool calls written as text
 
-Not decided yet. One more fix on the pipeline side would change the picture: reading a tool call that a model writes as plain JSON in its reply (backlog 8.6). With it, `qwen3:30b-a3b` would likely be the strongest local model on content, but it is also the slowest (about 4–5 minutes per filter). Without it, `gemma4:12b` is the most usable: every call was accepted, its mistakes were imprecise rather than invalid, and it took about 30 seconds per filter.
+The pipeline now reads a `build_filter` call that a model writes as JSON in its reply, and accepts a single filter spec without the `filters` list (backlog 8.6). A bare `{}` or other JSON is not treated as a call. `qwen3:30b-a3b` was rerun once on the two questions it had failed, with thinking off.
+
+| Model | Q6 | Q10 (from round 2) | Q19 | Seconds per question |
+|---|---|---|---|---|
+| **qwen3:30b-a3b**, thinking off | ✅ 109, exact gold, read from the reply | ✅ 36 / 13, alternative | ✅ 0: searched "spacecraft", got 0, and kept it, read from the reply | 434 and 473 |
+
+It is the only local model with a valid filter on all three questions. Both calls came from the reply text, and Claude never needs this path. Report separately how many of a model's calls were read from text, since that is part of how well it drives the tool.
+
+## Choosing local models for the full run
+
+Recommended for the full 25-query run:
+
+- **`qwen3:30b-a3b`**, the strongest local model on content: correct on all three questions after round 3. It is the slowest, at about 4–8 minutes per filter on this laptop, so a full run will take several hours and should run unattended.
+- **`gemma4:12b`**, the fast option: every call was accepted, its mistakes were imprecise rather than invalid, and it took about 30 seconds per filter. Its mistakes (a coded value repeated as a keyword) are also a useful contrast with qwen3's.
+
+Not carried forward:
+- `gpt-oss:20b`: its Q10 call could not be parsed on either run.
+- `qwen3.5:9b`: it could not settle Q10 within three calls.
+- `llama3.1:8b`: it split Q10 apart and invented values for Q19.
+
+Each can be added back if the full run needs a third local model.
 
 ## Round 1: before the fixes
 
