@@ -7,6 +7,8 @@ coded reports and compares them on one fixed, stratified test split:
   majority   always predicts the most common label (N)
   keyword    Y if a narrative contains a deferral word ("defer*", "MEL"), the rule a keyword filter uses
   tfidf      TF-IDF words + logistic regression; n-gram range and C chosen by 5-fold cross-validation on train
+  embedding  bge-small sentence embeddings (the retrieval index, averaged per report) + logistic regression
+  embedding+keyword  the same, with the keyword rule's output as one more feature
 
 The input is the reporters' narratives only. The synopsis is left out because ASRS analysts
 write it at coding time, so it can restate the label.
@@ -30,6 +32,7 @@ from sklearn.pipeline import make_pipeline
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "code"))
+import retrieve  # noqa: E402
 from filter_spec import term_pattern  # noqa: E402
 from preprocess import DB_PATH  # noqa: E402
 
@@ -78,6 +81,22 @@ def keyword_predict(texts, keywords=KEYWORDS):
     return np.array([int(any(p.search(t) for p in patterns)) for t in texts])
 
 
+def report_vectors(index, acns):
+    """One unit vector per report: the mean of its narratives' embeddings from the retrieval index."""
+    embeddings = index["embeddings"].astype(np.float32)
+    vectors = []
+    for acn in acns:
+        v = embeddings[index["acn"] == acn].mean(axis=0)
+        vectors.append(v / np.linalg.norm(v))
+    return np.stack(vectors)
+
+
+def embedding_model():
+    folds = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
+    lr = LogisticRegression(class_weight="balanced", max_iter=5000)
+    return GridSearchCV(lr, {"C": C_GRID}, scoring="f1", cv=folds, n_jobs=-1)
+
+
 def tfidf_model():
     pipe = make_pipeline(
         TfidfVectorizer(min_df=2, sublinear_tf=True),
@@ -110,16 +129,29 @@ def evaluate(con):
     x_train, y_train = [d["text"] for d in train], [d["label"] for d in train]
     x_test, y_test = [d["text"] for d in test], [d["label"] for d in test]
 
-    tfidf = tfidf_model().fit(x_train, y_train)
+    index = np.load(retrieve.INDEX_PATH)
+    problems = retrieve.check_index(index, retrieve.read_narratives(con))
+    if problems:
+        raise SystemExit(f"{'; '.join(problems)}. Rebuild with: python code/build_index.py")
+    e_train, e_test = report_vectors(index, split["train"]), report_vectors(index, split["test"])
+    k_train, k_test = keyword_predict(x_train)[:, None], keyword_predict(x_test)[:, None]
+
+    fitted = {
+        "tfidf": tfidf_model().fit(x_train, y_train),
+        "embedding": embedding_model().fit(e_train, y_train),
+        "embedding+keyword": embedding_model().fit(np.hstack([e_train, k_train]), y_train),
+    }
     preds = {
         "majority": np.full(len(y_test), int(np.mean(y_train) > 0.5)),
-        "keyword": keyword_predict(x_test),
-        "tfidf": tfidf.predict(x_test),
+        "keyword": k_test[:, 0],
+        "tfidf": fitted["tfidf"].predict(x_test),
+        "embedding": fitted["embedding"].predict(e_test),
+        "embedding+keyword": fitted["embedding+keyword"].predict(np.hstack([e_test, k_test])),
     }
     results = {name: {**scores(y_test, p), "f1_95ci": f1_interval(y_test, p)} for name, p in preds.items()}
-    results["tfidf"]["C"] = tfidf.best_params_["logisticregression__C"]
-    results["tfidf"]["ngram_range"] = list(tfidf.best_params_["tfidfvectorizer__ngram_range"])
-    results["tfidf"]["cv_f1"] = float(tfidf.best_score_)
+    for name, model in fitted.items():
+        results[name]["params"] = {k.split("__")[-1]: v for k, v in model.best_params_.items()}
+        results[name]["cv_f1"] = float(model.best_score_)
     return {
         "data": {"train": len(train), "test": len(test), "train_y": int(sum(y_train)), "test_y": int(sum(y_test))},
         "models": results,
@@ -143,8 +175,10 @@ def main():
     d = metrics["data"]
     print(f"train {d['train']} reports ({d['train_y']} Y), test {d['test']} reports ({d['test_y']} Y)\n")
     print(table(metrics))
-    t = metrics["models"]["tfidf"]
-    print(f"\ntfidf: ngram_range = {tuple(t['ngram_range'])}, C = {t['C']}, 5-fold CV F1 on train = {t['cv_f1']:.2f}")
+    print()
+    for name, m in metrics["models"].items():
+        if "params" in m:
+            print(f"{name}: {m['params']}, 5-fold CV F1 on train = {m['cv_f1']:.2f}")
 
 
 if __name__ == "__main__":

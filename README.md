@@ -15,7 +15,7 @@ An LLM assistant for exploring the NASA Aviation Safety Reporting System (ASRS) 
 | Answer step: cited synthesis, post-generation citation check | Complete (smoke-tested on 6 queries) |
 | Streamlit interface | Complete |
 | Model comparison | In progress: two rounds of filter-step [screening](evaluation/model_screening.md) of 2 Claude and 5 local models done; full runs planned |
-| NLP experiments: predicting the blank deferral flag from narratives | In progress: [baselines](nlp/README.md) done (keyword rule 0.79 F1, TF-IDF + logistic regression 0.76) |
+| NLP experiments: predicting the blank deferral flag from narratives | In progress: [baselines and embeddings](nlp/README.md) done (keyword rule 0.79 F1, TF-IDF 0.76, bge-small embeddings 0.73) |
 | Safety testing, peer testing | Planned |
 
 ## Pipeline
