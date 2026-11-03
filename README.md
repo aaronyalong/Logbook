@@ -15,6 +15,7 @@ An LLM assistant for exploring the NASA Aviation Safety Reporting System (ASRS) 
 | Answer step: cited synthesis, post-generation citation check | Complete (smoke-tested on 6 queries) |
 | Streamlit interface | Complete |
 | Model comparison | In progress: two rounds of filter-step [screening](evaluation/model_screening.md) of 2 Claude and 5 local models done; full runs planned |
+| NLP experiments: predicting the blank deferral flag from narratives | In progress: [baselines](nlp/README.md) done (keyword rule 0.79 F1, TF-IDF + logistic regression 0.76) |
 | Safety testing, peer testing | Planned |
 
 ## Pipeline
@@ -42,6 +43,7 @@ User question
 | [data/index/](data/index) | Prebuilt narrative embeddings for dense retrieval |
 | [prompts/](prompts) | System prompts and prompt variants |
 | [evaluation/](evaluation) | Query set, gold filters, and evaluation scripts |
+| [nlp/](nlp) | NLP experiments beside the pipeline: text classification of coded fields |
 | [tests/](tests) | Unit tests |
 | [demo/](demo) | Demo recordings and screenshots |
 | [IMPROVEMENTS.md](IMPROVEMENTS.md) | Improvements backlog: known issues and future work, in priority order |
