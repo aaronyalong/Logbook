@@ -9,6 +9,8 @@ coded reports and compares them on one fixed, stratified test split:
   tfidf      TF-IDF words + logistic regression; n-gram range and C chosen by 5-fold cross-validation on train
   embedding  bge-small sentence embeddings (the retrieval index, averaged per report) + logistic regression
   embedding+keyword  the same, with the keyword rule's output as one more feature
+  llm zero-shot (model)  Claude's labels from nlp/deferral_llm.py: the flag's definition, no training examples;
+                         scored only once that script has labeled every test report
 
 The input is the reporters' narratives only. The synopsis is left out because ASRS analysts
 write it at coding time, so it can restate the label.
@@ -44,6 +46,7 @@ KEYWORDS = ["defer*", "MEL"]
 C_GRID = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30]
 NGRAMS = [(1, 1), (1, 2)]
 BOOTSTRAP = 1000
+LLM_MODELS = ["claude-haiku-5-5", "claude-opus-5-5"]
 
 
 def load_dataset(con):
@@ -107,6 +110,19 @@ def tfidf_model():
     return GridSearchCV(pipe, grid, scoring="f1", cv=folds, n_jobs=-1)
 
 
+def llm_predictions(acns):
+    """{row name: (predictions, unlabeled count)} for each model whose labels cover every report in `acns`."""
+    import deferral_llm  # imported here because deferral_llm imports this module
+    preds = {}
+    for model in LLM_MODELS:
+        labels = deferral_llm.load_labels(model=model)
+        if all(a in labels for a in acns):
+            found = [labels[a]["label"] for a in acns]
+            name = f"llm zero-shot ({model.split('-')[1]})"
+            preds[name] = (np.array([x or 0 for x in found]), sum(x is None for x in found))
+    return preds
+
+
 def scores(y, pred):
     return {"precision": precision_score(y, pred, zero_division=0), "recall": recall_score(y, pred),
             "f1": f1_score(y, pred, zero_division=0), "accuracy": accuracy_score(y, pred)}
@@ -148,7 +164,11 @@ def evaluate(con):
         "embedding": fitted["embedding"].predict(e_test),
         "embedding+keyword": fitted["embedding+keyword"].predict(np.hstack([e_test, k_test])),
     }
+    llm = llm_predictions(split["test"])
+    preds |= {name: p for name, (p, _) in llm.items()}
     results = {name: {**scores(y_test, p), "f1_95ci": f1_interval(y_test, p)} for name, p in preds.items()}
+    for name, (_, unlabeled) in llm.items():
+        results[name]["unlabeled"] = unlabeled  # scored as N
     for name, model in fitted.items():
         results[name]["params"] = {k.split("__")[-1]: v for k, v in model.best_params_.items()}
         results[name]["cv_f1"] = float(model.best_score_)
