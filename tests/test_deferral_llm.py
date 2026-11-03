@@ -52,3 +52,18 @@ def test_label_split_skips_reports_already_labeled(tmp_path):
     assert [r["acn"] for r in new] == [8]
     assert len(client.requests) == 2
     assert {a: r["label"] for a, r in llm.load_labels(path).items()} == {7: 1, 8: 0}
+
+
+def test_dev_split_is_a_fixed_sample_of_train():
+    split = {"train": list(range(500)), "test": list(range(500, 600))}
+    dev = llm.dev_split(split)
+    assert len(dev) == llm.DEV_SIZE and set(dev) <= set(split["train"])
+    assert llm.dev_split(split) == dev
+
+
+def test_each_prompt_version_has_its_own_labels(tmp_path):
+    path = tmp_path / "labels.jsonl"
+    llm.label_split([REPORT], FakeClient(response(label_call("Y"))), prompt="v1", path=path, workers=1)
+    llm.label_split([REPORT], FakeClient(response(label_call("N"))), prompt="v2", path=path, workers=1)
+    assert llm.load_labels(path, prompt="v1")[7]["label"] == 1
+    assert llm.load_labels(path, prompt="v2")[7]["label"] == 0

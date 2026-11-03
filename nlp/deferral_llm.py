@@ -5,15 +5,18 @@ nlp/results/deferral_llm.jsonl. Reports already labeled with the same model and 
 skipped, so an interrupted run resumes where it stopped. nlp/deferral.py scores the labels
 once every test report has one.
 
-The prompt (nlp/prompts/deferral_label_system.md) was written once from the field's definition
-and not tuned on the test set; changing it changes prompt_sha, which starts a fresh set of labels.
+Prompts live in nlp/prompts/deferral_label_<version>.md. v1 was written once from the field's
+definition. Later versions are developed on the dev split (a fixed sample of training reports)
+and scored on the test split only once finished. Editing a prompt changes its prompt_sha, which
+starts a fresh set of labels.
 
-Usage: python nlp/deferral_llm.py [--model claude-haiku-5-5] [--split test] [--limit N]
+Usage: python nlp/deferral_llm.py [--model claude-haiku-5-5] [--prompt v1] [--split test|dev|train] [--limit N]
 """
 
 import argparse
 import hashlib
 import json
+import random
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -23,7 +26,9 @@ import duckdb
 import deferral as dfr
 from preprocess import DB_PATH
 
-PROMPT_PATH = dfr.ROOT / "nlp/prompts/deferral_label_system.md"
+PROMPT_DIR = dfr.ROOT / "nlp/prompts"
+PROMPT = "v1"
+DEV_SIZE = 200
 LABELS_PATH = dfr.ROOT / "nlp/results/deferral_llm.jsonl"
 MODEL = "claude-haiku-5-5"
 EFFORT = "medium"
@@ -43,17 +48,26 @@ TOOL = {
 }
 
 
-def prompt_sha():
-    """Identifies the prompt and tool, so labels from an older prompt are never mixed in."""
-    text = PROMPT_PATH.read_text() + json.dumps(TOOL, sort_keys=True)
+def prompt_text(prompt=PROMPT):
+    return (PROMPT_DIR / f"deferral_label_{prompt}.md").read_text()
+
+
+def prompt_sha(prompt=PROMPT):
+    """Identifies the prompt's text and the tool, so labels from an edited prompt are never mixed in."""
+    text = prompt_text(prompt) + json.dumps(TOOL, sort_keys=True)
     return hashlib.sha256(text.encode()).hexdigest()[:12]
 
 
-def label_report(report, client, model=MODEL):
+def dev_split(split):
+    """A fixed random sample of the training reports, for developing prompts without touching the test set."""
+    return sorted(random.Random(dfr.SEED).sample(split["train"], DEV_SIZE))
+
+
+def label_report(report, client, model=MODEL, prompt=PROMPT):
     response = client.beta.messages.create(
         model=model,
         max_tokens=4000,
-        system=PROMPT_PATH.read_text(),
+        system=prompt_text(prompt),
         tools=[TOOL],
         tool_choice={"type": "auto", "disable_parallel_tool_use": True},
         output_config={"effort": EFFORT},
@@ -64,29 +78,30 @@ def label_report(report, client, model=MODEL):
     call = next((b.input for b in response.content if b.type == "tool_use" and b.name == TOOL["name"]), None)
     label = {"Y": 1, "N": 0}.get(call.get("deferred")) if call else None
     return {
-        "acn": report["acn"], "model": model, "response_model": response.model, "prompt_sha": prompt_sha(),
+        "acn": report["acn"], "model": model, "response_model": response.model,
+        "prompt": prompt, "prompt_sha": prompt_sha(prompt),
         "label": label, "evidence": call.get("evidence", "") if call else None, "stop_reason": response.stop_reason,
         "usage": {k: getattr(response.usage, k, None) or 0 for k in ("input_tokens", "output_tokens")},
     }
 
 
-def load_labels(path=LABELS_PATH, model=MODEL):
-    """{acn: record} for the current prompt and `model`; the latest record wins."""
+def load_labels(path=LABELS_PATH, model=MODEL, prompt=PROMPT):
+    """{acn: record} for the current text of `prompt` and `model`; the latest record wins."""
     if not path.exists():
         return {}
-    sha = prompt_sha()
+    sha = prompt_sha(prompt)
     records = (json.loads(line) for line in path.read_text().splitlines() if line.strip())
     return {r["acn"]: r for r in records if r["model"] == model and r["prompt_sha"] == sha}
 
 
-def label_split(reports, client, model=MODEL, path=LABELS_PATH, workers=WORKERS):
+def label_split(reports, client, model=MODEL, prompt=PROMPT, path=LABELS_PATH, workers=WORKERS):
     """Labels every report not yet labeled, appending each record as it arrives. Returns the new records."""
-    done = load_labels(path, model)
+    done = load_labels(path, model, prompt)
     todo = [r for r in reports if r["acn"] not in done]
     path.parent.mkdir(parents=True, exist_ok=True)
     new = []
     with ThreadPoolExecutor(workers) as pool, path.open("a") as f:
-        for record in pool.map(lambda r: label_report(r, client, model), todo):
+        for record in pool.map(lambda r: label_report(r, client, model, prompt), todo):
             f.write(json.dumps(record) + "\n")
             f.flush()
             new.append(record)
@@ -96,24 +111,30 @@ def label_split(reports, client, model=MODEL, path=LABELS_PATH, workers=WORKERS)
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model", default=MODEL)
-    parser.add_argument("--split", choices=["train", "test"], default="test")
+    parser.add_argument("--prompt", default=PROMPT, help="version: nlp/prompts/deferral_label_<version>.md")
+    parser.add_argument("--split", choices=["train", "dev", "test"], default="test")
     parser.add_argument("--limit", type=int, help="label only the first N reports of the split")
     args = parser.parse_args()
 
     con = duckdb.connect(str(DB_PATH), read_only=True)
     data = dfr.load_dataset(con)
     by_acn = {d["acn"]: d for d in data}
-    reports = [by_acn[a] for a in dfr.load_split(data)[args.split]][:args.limit]
-    new = label_split(reports, anthropic.Anthropic(), args.model)
+    split = dfr.load_split(data)
+    acns = dev_split(split) if args.split == "dev" else split[args.split]
+    reports = [by_acn[a] for a in acns][:args.limit]
+    new = label_split(reports, anthropic.Anthropic(), args.model, args.prompt)
 
     unlabeled = sum(r["label"] is None for r in new)
     tokens = {k: sum(r["usage"][k] for r in new) for k in ("input_tokens", "output_tokens")}
-    print(f"Labeled {len(new)} reports with {args.model} ({unlabeled} without a label); "
+    print(f"Labeled {len(new)} reports with {args.model}, prompt {args.prompt} ({unlabeled} without a label); "
           f"{tokens['input_tokens']} input and {tokens['output_tokens']} output tokens")
-    agree = [r for r in new if r["label"] is not None]
-    if agree:
-        correct = sum(r["label"] == by_acn[r["acn"]]["label"] for r in agree)
-        print(f"Matches the analysts' flag on {correct} of {len(agree)}")
+    labels = load_labels(model=args.model, prompt=args.prompt)
+    done = [a for a in acns[:args.limit] if a in labels]
+    y = [by_acn[a]["label"] for a in done]
+    pred = [labels[a]["label"] or 0 for a in done]
+    s = dfr.scores(y, pred)
+    print(f"{args.split}: {len(done)} reports, F1 {s['f1']:.2f}, precision {s['precision']:.2f}, "
+          f"recall {s['recall']:.2f}, accuracy {s['accuracy']:.2f}")
 
 
 if __name__ == "__main__":
