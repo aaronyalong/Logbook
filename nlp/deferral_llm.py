@@ -10,7 +10,11 @@ definition. Later versions are developed on the dev split (a fixed sample of tra
 and scored on the test split only once finished. Editing a prompt changes its prompt_sha, which
 starts a fresh set of labels.
 
-Usage: python nlp/deferral_llm.py [--model claude-haiku-5-5] [--prompt v1] [--split test|dev|train] [--limit N]
+`--split blank` labels uncoded reports instead (optionally only `--years`), for filling in the flag
+(nlp/deferral_fill.py); those have no analyst label to score against.
+
+Usage: python nlp/deferral_llm.py [--model claude-haiku-5-5] [--prompt v1] [--split test|dev|train|blank]
+                                  [--years 2019 2023] [--limit N]
 """
 
 import argparse
@@ -112,15 +116,20 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model", default=MODEL)
     parser.add_argument("--prompt", default=PROMPT, help="version: nlp/prompts/deferral_label_<version>.md")
-    parser.add_argument("--split", choices=["train", "dev", "test"], default="test")
+    parser.add_argument("--split", choices=["train", "dev", "test", "blank"], default="test")
+    parser.add_argument("--years", type=int, nargs="+", help="with --split blank: only reports from these years")
     parser.add_argument("--limit", type=int, help="label only the first N reports of the split")
     args = parser.parse_args()
 
     con = duckdb.connect(str(DB_PATH), read_only=True)
-    data = dfr.load_dataset(con)
+    if args.split == "blank":
+        data = [d for d in dfr.load_dataset(con, blank=True) if not args.years or d["year"] in args.years]
+        acns = [d["acn"] for d in data]
+    else:
+        data = dfr.load_dataset(con)
+        split = dfr.load_split(data)
+        acns = dev_split(split) if args.split == "dev" else split[args.split]
     by_acn = {d["acn"]: d for d in data}
-    split = dfr.load_split(data)
-    acns = dev_split(split) if args.split == "dev" else split[args.split]
     reports = [by_acn[a] for a in acns][:args.limit]
     new = label_split(reports, anthropic.Anthropic(), args.model, args.prompt)
 
@@ -128,6 +137,8 @@ def main():
     tokens = {k: sum(r["usage"][k] for r in new) for k in ("input_tokens", "output_tokens")}
     print(f"Labeled {len(new)} reports with {args.model}, prompt {args.prompt} ({unlabeled} without a label); "
           f"{tokens['input_tokens']} input and {tokens['output_tokens']} output tokens")
+    if args.split == "blank":
+        return
     labels = load_labels(model=args.model, prompt=args.prompt)
     done = [a for a in acns[:args.limit] if a in labels]
     y = [by_acn[a]["label"] for a in done]

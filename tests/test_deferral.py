@@ -68,3 +68,7 @@ def test_report_vectors_average_narratives_and_normalize():
     index = {"acn": np.array([1, 1, 2]), "embeddings": np.array([[3, 0], [3, 8], [0, 2]], dtype=np.float16)}
     vectors = dfr.report_vectors(index, [2, 1])
     np.testing.assert_allclose(vectors, [[0, 1], [0.6, 0.8]], atol=1e-6)
+
+
+def test_dataset_can_load_the_blank_reports_instead(con):
+    assert dfr.load_dataset(con, blank=True) == [{"acn": 3, "year": 2021, "text": "Uncoded.", "label": None}]

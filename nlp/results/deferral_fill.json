@@ -1,0 +1,132 @@
+{
+  "2019": {
+    "reports_in_year": 273,
+    "coded_y_in_year": 36,
+    "blank_in_year": 176,
+    "sets": {
+      "keyword": {
+        "reports": 30,
+        "coded_y": 14,
+        "coded_n": 1,
+        "blank": 15,
+        "in_keyword": 30
+      },
+      "flag": {
+        "reports": 36,
+        "coded_y": 36,
+        "coded_n": 0,
+        "blank": 0,
+        "in_keyword": 14
+      },
+      "flag + rule": {
+        "reports": 61,
+        "coded_y": 36,
+        "coded_n": 0,
+        "blank": 25,
+        "in_keyword": 29
+      },
+      "flag + llm": {
+        "reports": 58,
+        "coded_y": 36,
+        "coded_n": 0,
+        "blank": 22,
+        "in_keyword": 25
+      }
+    },
+    "retrieved": {
+      "keyword": {
+        "reports": 10,
+        "coded_y": 7,
+        "coded_n": 0,
+        "blank": 3,
+        "in_keyword": 10
+      },
+      "flag": {
+        "reports": 10,
+        "coded_y": 10,
+        "coded_n": 0,
+        "blank": 0,
+        "in_keyword": 7
+      },
+      "flag + rule": {
+        "reports": 10,
+        "coded_y": 7,
+        "coded_n": 0,
+        "blank": 3,
+        "in_keyword": 8
+      },
+      "flag + llm": {
+        "reports": 10,
+        "coded_y": 7,
+        "coded_n": 0,
+        "blank": 3,
+        "in_keyword": 7
+      }
+    }
+  },
+  "2023": {
+    "reports_in_year": 120,
+    "coded_y_in_year": 13,
+    "blank_in_year": 81,
+    "sets": {
+      "keyword": {
+        "reports": 12,
+        "coded_y": 7,
+        "coded_n": 1,
+        "blank": 4,
+        "in_keyword": 12
+      },
+      "flag": {
+        "reports": 13,
+        "coded_y": 13,
+        "coded_n": 0,
+        "blank": 0,
+        "in_keyword": 7
+      },
+      "flag + rule": {
+        "reports": 19,
+        "coded_y": 13,
+        "coded_n": 0,
+        "blank": 6,
+        "in_keyword": 11
+      },
+      "flag + llm": {
+        "reports": 19,
+        "coded_y": 13,
+        "coded_n": 0,
+        "blank": 6,
+        "in_keyword": 11
+      }
+    },
+    "retrieved": {
+      "keyword": {
+        "reports": 9,
+        "coded_y": 6,
+        "coded_n": 0,
+        "blank": 3,
+        "in_keyword": 9
+      },
+      "flag": {
+        "reports": 9,
+        "coded_y": 9,
+        "coded_n": 0,
+        "blank": 0,
+        "in_keyword": 6
+      },
+      "flag + rule": {
+        "reports": 9,
+        "coded_y": 6,
+        "coded_n": 0,
+        "blank": 3,
+        "in_keyword": 8
+      },
+      "flag + llm": {
+        "reports": 9,
+        "coded_y": 4,
+        "coded_n": 0,
+        "blank": 5,
+        "in_keyword": 6
+      }
+    }
+  }
+}

@@ -49,16 +49,17 @@ BOOTSTRAP = 1000
 LLM_MODELS = ["claude-haiku-5-5", "claude-opus-5-5"]
 
 
-def load_dataset(con):
-    """Coded reports with their narratives joined in part order: acn, year, text, label (1 = Y)."""
-    rows = con.execute("""
+def load_dataset(con, blank=False):
+    """Coded reports (or, with blank=True, uncoded ones) with their narratives joined in part order:
+    acn, year, text, label (1 = Y, None when blank)."""
+    rows = con.execute(f"""
         SELECT r.acn, r.year, string_agg(n.text, '\n\n' ORDER BY n.part) AS text, r.maintenance_deferred = 'Y' AS y
         FROM reports r JOIN narratives n ON n.acn = r.acn
-        WHERE r.maintenance_deferred IS NOT NULL
+        WHERE r.maintenance_deferred IS {'' if blank else 'NOT '}NULL
         GROUP BY r.acn, r.year, r.maintenance_deferred
         ORDER BY r.acn
     """).fetchall()
-    return [{"acn": acn, "year": year, "text": text, "label": int(y)} for acn, year, text, y in rows]
+    return [{"acn": acn, "year": year, "text": text, "label": None if y is None else int(y)} for acn, year, text, y in rows]
 
 
 def make_split(data, test_size=TEST_SIZE, seed=SEED):

@@ -107,6 +107,9 @@ This is now only a prompt variant in [prompts/](prompts). Do it only after the i
 ### 7.1 Review the abbreviation expansion by hand
 This was in progress at check-in 1. Read expansions in a sample of narratives, and fix mis-expansions with `overrides` or `do_not_expand` in [maintenance_abbreviations.json](data/reference/maintenance_abbreviations.json). Then rebuild the database and the embedding index. Until the index is rebuilt, retrieval refuses to load it, which is intended.
 
+### 7.2 Query 10's two accepted filters find different reports
+Query 10's notes accept either `text_any: ["defer*"]` or `where.maintenance_deferred = ["Y"]`. In 2019 the keyword filter matches 30 reports and the flag 36, but they share only 14: the keyword misses 22 coded deferrals, and the flag misses the 15 blank-flag reports that say "defer*" ([nlp/README.md](nlp/README.md), finding 11). Scoring filters by overlap (2.1) would treat the two as very different answers. A filter spec cannot OR a coded field with a keyword, so the union is not expressible today. Options: score query 10 against the union as a set; allow an `any_of` group in the spec; or add a filled-in flag field marked as predicted.
+
 ## 8. From the model screening
 
 Found in the [filter-step screening](evaluation/model_screening.md) of Claude and five local models. Apply each fix to every model, so the comparison stays fair, and rerun the screening afterward.
