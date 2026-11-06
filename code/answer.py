@@ -1,16 +1,18 @@
-"""Answer a question from the corpus: filter -> retrieve -> Claude writes a cited answer.
+"""Answer a question from the corpus: filter -> retrieve -> a model writes a cited answer.
 
 1. build_filter (code/build_filter.py) chooses the reports the question is about.
 2. Hybrid retrieval (code/retrieve.py) ranks their narratives, TOP_K per filter.
-3. Claude answers from those reports only (prompts/answer_system.md), citing [ACN n].
+3. The model answers from those reports only (prompts/answer_system.md), citing [ACN n].
 4. Every cited ACN is checked after generation: shown to the model (verified), in the
    corpus but not shown (unsupported), or not in the corpus at all (fabricated).
 
 If no valid filter could be built, the whole corpus is searched and the model is told so.
 Each answer is logged to logs/answer.jsonl; the filter step logs its calls separately.
+The filter and answer steps can use different models (code/llm.py).
 
 Usage: python code/answer.py "What do reporters say about how fatigue affected their work?"
-Requires ANTHROPIC_API_KEY.
+                             [--model MODEL] [--filter-model MODEL] [--mode hybrid|bm25|dense]
+Claude models require ANTHROPIC_API_KEY; others require a running Ollama server.
 """
 
 import argparse
@@ -19,15 +21,14 @@ import re
 import time
 from html import escape
 
-import anthropic
 import duckdb
 
 import build_filter as bf
+import llm
 import retrieve
 from preprocess import DB_PATH, ROOT
 
 MODEL = "claude-opus-5-5"
-EFFORT = "medium"
 TOP_K = 10  # narratives retrieved per filter
 TOP_GROUPS = 10
 PROMPT_PATH = ROOT / "prompts/answer_system.md"
@@ -96,19 +97,18 @@ def render_context(filter_record, sides, info):
 
 
 def answer(question, client=None, retriever=None, con=None, mode="hybrid",
-           log_path=LOG_PATH, filter_log_path=bf.LOG_PATH, on_step=None):
+           log_path=LOG_PATH, filter_log_path=bf.LOG_PATH, on_step=None, model=MODEL, filter_model=bf.MODEL):
     """Returns a record with status ("ok" or "refusal"), answer text, citation check, sources
     (the verified reports), the filter used, and what was retrieved.
 
     on_step, if given, is called with "filter", "retrieve", and "answer" as each stage starts.
     """
-    client = client or anthropic.Anthropic()
     con = con or duckdb.connect(str(DB_PATH), read_only=True)
     retriever = retriever or retrieve.load(con)
     step = on_step or (lambda stage: None)
 
     step("filter")
-    filt = bf.build_filter(question, client=client, con=con, log_path=filter_log_path)
+    filt = bf.build_filter(question, client=client, con=con, model=filter_model, log_path=filter_log_path)
     record = {"question": question, "status": "refusal", "answer": "", "citations": None, "sources": [],
               "filter": {"status": filt["status"], "filters": filt["filters"],
                          "counts": [r["count"] for r in filt["results"] or []]},
@@ -128,25 +128,17 @@ def answer(question, client=None, retriever=None, con=None, mode="hybrid",
     info = report_info(shown, con)
 
     step("answer")
-    response = client.beta.messages.create(
-        model=MODEL,
-        max_tokens=16000,
-        system=PROMPT_PATH.read_text(),
-        output_config={"effort": EFFORT},
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-        messages=[{"role": "user", "content": f"<context>\n{render_context(filt, sides, info)}\n</context>\n\n"
-                                              f"<question>\n{question}\n</question>"}],
-    )
-    record["model"] = response.model
-    record["usage"]["answer"] = {k: getattr(response.usage, k, None) or 0 for k in ("input_tokens", "output_tokens")}
+    reply = llm.open_chat(model, PROMPT_PATH.read_text(),
+                          f"<context>\n{render_context(filt, sides, info)}\n</context>\n\n"
+                          f"<question>\n{question}\n</question>", client=client).complete()
+    record["model"] = reply.model
+    record["usage"]["answer"] = {k: n for k, n in reply.usage.items() if not k.startswith("cache")}
     record["retrieved"] = [[{k: h[k] for k in ("acn", "part", "score")} for h in s["hits"]] for s in sides]
-    if response.stop_reason == "refusal":
+    if reply.stop_reason == "refusal":
         return _finish(record, log_path)
 
-    text = "".join(b.text for b in response.content if b.type == "text").strip()
-    citations = check_citations(text, shown, con)
-    record |= {"status": "ok", "answer": text, "citations": citations,
+    citations = check_citations(reply.text, shown, con)
+    record |= {"status": "ok", "answer": reply.text, "citations": citations,
                "sources": [info[a] for a in citations["verified"]]}
     return _finish(record, log_path)
 
@@ -163,8 +155,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("question")
     parser.add_argument("--mode", choices=retrieve.MODES, default="hybrid")
+    parser.add_argument("--model", default=MODEL, help="model for the answer step")
+    parser.add_argument("--filter-model", default=bf.MODEL, help="model for the filter step")
     args = parser.parse_args()
-    record = answer(args.question, mode=args.mode)
+    record = answer(args.question, mode=args.mode, model=args.model, filter_model=args.filter_model)
 
     f = record["filter"]
     print(f"filter: {f['status']} {json.dumps(f['filters'])} -> {f['counts']} reports\n")

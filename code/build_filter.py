@@ -1,30 +1,29 @@
-"""build_filter as a Claude tool call: question -> validated filter specs -> matching reports.
+"""build_filter as a model tool call: question -> validated filter specs -> matching reports.
 
-Claude sees the field reference and every observed value (prompts/build_filter_system.md)
+The model sees the field reference and every observed value (prompts/build_filter_system.md)
 and calls the build_filter tool with a list of filter specs (code/filter_spec.py): one for
 most questions, one per side for a comparison. Each call is validated before it runs; a
-rejected call goes back to Claude with the problems listed so it can correct itself, up to
-MAX_CALLS calls. The last accepted call is the result.
+rejected call goes back to the model with the problems listed so it can correct itself, up to
+MAX_CALLS calls. The last accepted call is the result. Any model in code/llm.py can do this.
 
 Every question is logged to logs/build_filter.jsonl with each call, its validation errors,
 and its match counts, so a bad filter can be told apart from bad retrieval later.
 
-Usage: python code/build_filter.py "Show me 737 reports from 2022 to 2024"
-Requires ANTHROPIC_API_KEY.
+Usage: python code/build_filter.py "Show me 737 reports from 2022 to 2024" [--model MODEL]
+Claude models require ANTHROPIC_API_KEY; others require a running Ollama server.
 """
 
 import argparse
 import json
 import time
 
-import anthropic
 import duckdb
 
+import llm
 from filter_spec import FIELDS, FILTER_VALUES, KEYS, run, validate
 from preprocess import DB_PATH, ROOT
 
 MODEL = "claude-opus-5-5"
-EFFORT = "medium"
 MAX_CALLS = 3
 TOP_GROUPS = 10  # group_by values shown to the model per filter
 PROMPT_PATH = ROOT / "prompts/build_filter_system.md"
@@ -79,31 +78,6 @@ def system_prompt():
     return PROMPT_PATH.read_text().replace("<<FIELD_VALUES>>", values)
 
 
-def parse_text_call(text):
-    """Find a build_filter call that a model wrote as JSON in its reply instead of making a tool call.
-
-    Some local models write {"name": "build_filter", "arguments": {...}} as plain text, without the
-    tags their server needs to recognize a tool call. Returns the arguments, or None.
-    """
-    decoder = json.JSONDecoder()
-    for i, char in enumerate(text):
-        if char != "{":
-            continue
-        try:
-            obj, _ = decoder.raw_decode(text, i)
-        except json.JSONDecodeError:
-            continue
-        if isinstance(obj, dict) and obj.get("name") == TOOL["name"] and "arguments" in obj:
-            args = obj["arguments"]
-            if isinstance(args, str):
-                try:
-                    args = json.loads(args)
-                except json.JSONDecodeError:
-                    return None
-            return args
-    return None
-
-
 def execute(tool_input, con):
     """Validate and run one build_filter call. Returns {"input", "errors"} plus "filters" and "results" if accepted."""
     if isinstance(tool_input, dict) and "filters" not in tool_input and set(tool_input) & KEYS:
@@ -139,8 +113,8 @@ def tool_output(call):
     return json.dumps(summary)
 
 
-def build_filter(question, client=None, con=None, model=MODEL, log_path=LOG_PATH):
-    """Ask Claude for the filter for `question`.
+def build_filter(question, client=None, con=None, model=MODEL, log_path=LOG_PATH, think=False):
+    """Ask `model` for the filter for `question`.
 
     Returns a record with:
       status    "ok" (a call was accepted), "invalid" (every call rejected),
@@ -149,40 +123,31 @@ def build_filter(question, client=None, con=None, model=MODEL, log_path=LOG_PATH
       results   filter_spec.run() output for each accepted spec
       calls     every call with its validation errors and match counts
     """
-    client = client or anthropic.Anthropic()
     con = con or duckdb.connect(str(DB_PATH), read_only=True)
-    messages = [{"role": "user", "content": question}]
+    chat = llm.open_chat(model, system_prompt(), question, tools=[TOOL], client=client, cache_system=True, think=think)
     calls, accepted, usage = [], None, {}
 
     for _ in range(MAX_CALLS):
-        response = client.beta.messages.create(
-            model=model,
-            max_tokens=16000,
-            system=[{"type": "text", "text": system_prompt(), "cache_control": {"type": "ephemeral"}}],
-            tools=[TOOL],
-            tool_choice={"type": "auto", "disable_parallel_tool_use": True},
-            output_config={"effort": EFFORT},
-            betas=["server-side-fallback-2026-07-01"],
-            fallbacks="default",
-            messages=messages,
-        )
-        for key in ("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"):
-            usage[key] = usage.get(key, 0) + (getattr(response.usage, key, None) or 0)
-        if response.stop_reason != "tool_use":
+        reply = chat.complete()
+        for key, n in reply.usage.items():
+            usage[key] = usage.get(key, 0) + n
+        if reply.error:
+            calls.append({"input": None, "errors": [reply.error]})
+            break
+        if reply.stop_reason != "tool_use":
             break
 
-        messages.append({"role": "assistant", "content": response.content})
         results = []
-        for block in (b for b in response.content if b.type == "tool_use"):
-            call = execute(block.input, con)
+        for c in reply.calls:
+            call = execute(c.input, con)
+            call["from_text"] = c.from_text
             calls.append(call)
             if not call["errors"]:
                 accepted = call
-            results.append({"type": "tool_result", "tool_use_id": block.id,
-                            "content": tool_output(call), "is_error": bool(call["errors"])})
-        messages.append({"role": "user", "content": results})
+            results.append((c.id, tool_output(call), bool(call["errors"])))
+        chat.add_tool_results(results)
 
-    if response.stop_reason == "refusal":
+    if reply.stop_reason == "refusal":
         status = "refusal"
     elif accepted:
         status = "ok"
@@ -190,13 +155,13 @@ def build_filter(question, client=None, con=None, model=MODEL, log_path=LOG_PATH
         status = "invalid" if calls else "no_call"
     record = {
         "question": question,
-        "model": response.model,
+        "model": reply.model,
         "status": status,
         "filters": accepted["filters"] if accepted else None,
         "results": accepted["results"] if accepted else None,
         "calls": calls,
-        "explanation": "".join(b.text for b in response.content if b.type == "text").strip(),
-        "stop_reason": response.stop_reason,
+        "explanation": reply.text,
+        "stop_reason": reply.stop_reason,
         "usage": usage,
     }
     if log_path:
@@ -219,7 +184,9 @@ def _log(record, log_path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("question")
-    record = build_filter(parser.parse_args().question)
+    parser.add_argument("--model", default=MODEL)
+    args = parser.parse_args()
+    record = build_filter(args.question, model=args.model)
     print(f"status: {record['status']}  ({len(record['calls'])} call(s), model {record['model']})")
     for i, call in enumerate(record["calls"], 1):
         print(f"call {i}: {json.dumps(call['input'])}")

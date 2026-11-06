@@ -151,19 +151,6 @@ def test_execute_wraps_a_single_spec(con):
     assert call["filters"] == [B737]
 
 
-@pytest.mark.parametrize("text, args", [
-    ('{"name": "build_filter", "arguments": {"where": {"aircraft_family": ["B737"]}}}', B737),
-    ('Reasoning first.\n<tool_call>\n{"name": "build_filter", "arguments": {"filters": [{}]}}\n</tool_call>',
-     {"filters": [{}]}),
-    ('{"name": "build_filter", "arguments": "{\\"filters\\": [{}]}"}', {"filters": [{}]}),  # arguments as JSON text
-    ('{}\nNo filter fits this question.', None),  # bare JSON is not a call
-    ('{"name": "other_tool", "arguments": {}}', None),
-    ("No JSON here.", None),
-])
-def test_parse_text_call(text, args):
-    assert bf.parse_text_call(text) == args
-
-
 def test_log_records_calls_without_acn_lists(con, tmp_path):
     log = tmp_path / "log.jsonl"
     run_tool(con, response(tool_use([B737])), response(text("Done.")), log_path=log)
