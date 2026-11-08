@@ -77,7 +77,3 @@ Query 10 asks: "Compare what reporters said about deferred maintenance in 2019 v
 12. **Filling the blanks roughly doubles the 2019 candidate set** (30 → 58 or 61) and adds about half to 2023 (12 → 19). The rule and Haiku fill in mostly the same blank reports; they differ on 13 in 2019 and 4 in 2023. With the classifiers' test precision of about 0.79, roughly one in five filled-in reports would not be a deferral.
 13. **Retrieval absorbs most of the difference.** The pipeline answers from the top 10 narratives, and those change much less than the candidate sets: 6 to 8 of the 10 reports are the same as with the keyword filter, because the query's own words already rank deferral reports first. So filling the flag would change query 10's answer only a little. It would matter more for counting questions ("how many deferrals in 2019?"), where the keyword filter's count, 30, undercounts the coded deferrals alone, 36.
 14. **Not wired in.** A filled-in field would have to be marked as predicted wherever it is shown, since about a fifth of the filled values are wrong, and the gain for query 10 is small. The finding for the evaluation is the gap in finding 11 (backlog 7.2).
-
-### Next
-
-- Error analysis: the words the TF-IDF model weights most and a confusion matrix.

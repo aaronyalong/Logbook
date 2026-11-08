@@ -180,7 +180,7 @@ def main():
     try:
         con, retriever, client = resources()
     except (duckdb.Error, OSError, RuntimeError) as e:
-        st.error(f"Could not load the corpus: {e}. Run the build steps in the README's Usage section.")
+        st.error(f"Could not load the corpus: {e}. Run the build steps in the README's Setup section.")
         st.stop()
 
     history = st.session_state.setdefault("history", [])
